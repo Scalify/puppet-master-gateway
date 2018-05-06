@@ -1,0 +1,10 @@
+package: gitlab.com/scalifyme/puppet-master/gateway
+import:
+- package: github.com/spf13/cobra
+- package: github.com/Sirupsen/logrus
+  version: ^1.0.5
+- package: github.com/streadway/amqp
+- package: github.com/satori/go.uuid
+- package: github.com/kelseyhightower/envconfig
+- package: github.com/rhinoman/couchdb-go
+- package: github.com/gorilla/mux
