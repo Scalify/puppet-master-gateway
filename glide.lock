@@ -1,8 +1,10 @@
-hash: ce8e8b7df654e538873be3fd143304a5d08a0bef0c87ae958f7b129cbe436338
-updated: 2018-05-06T21:54:01.684262837+02:00
+hash: 3192870c45b49494712cdfe1ce6c1886799811ec54e6a5f7d24b0baec28666cd
+updated: 2018-05-12T11:58:45.369560348+02:00
 imports:
+- name: github.com/gorilla/context
+  version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
-  version: ded0c29b24f96f46cf349e6701b099db601cf8ec
+  version: 5e55a4adb89fb64e8b13bbd302eeedac7a4ba5d8
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/kelseyhightower/envconfig

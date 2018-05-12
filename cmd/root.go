@@ -9,8 +9,8 @@ import (
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:   "gateway",
-	Short: "the puppet master gateway",
+	Use:   "puppet-master",
+	Short: "the puppet master",
 }
 
 // Execute adds all child commands to the root command sets flags appropriately.

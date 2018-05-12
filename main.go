@@ -1,6 +1,6 @@
 package main
 
-import "gitlab.com/scalifyme/puppet-master/gateway/cmd"
+import "gitlab.com/scalifyme/puppet-master/puppet-master/cmd"
 
 func main() {
 	cmd.Execute()

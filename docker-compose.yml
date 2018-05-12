@@ -6,14 +6,31 @@ services:
       - puppet_master
     environment:
       - "COUCH_DB_HOST=database"
-      - "COUCH_DB_PORT=6984"
+      - "COUCH_DB_PORT=5984"
+      - "COUCH_DB_USERNAME=puppet"
+      - "COUCH_DB_PASSWORD=puppet"
+      - "VERBOSE=true"
+      - "LISTEN_PORT=3000"
+    command: "gateway"
+    links:
+      - database
+    ports:
+      - "3000:3000"
+  coordinator:
+    build: .
+    networks:
+      - puppet_master
+    environment:
+      - "COUCH_DB_HOST=database"
+      - "COUCH_DB_PORT=5984"
       - "COUCH_DB_USERNAME=puppet"
       - "COUCH_DB_PASSWORD=puppet"
       - "QUEUE_HOST=queue"
       - "QUEUE_PORT=5672"
       - "QUEUE_USERNAME=puppet"
       - "QUEUE_PASSWORD=puppet"
-    command: "server"
+      - "VERBOSE=true"
+    command: "coordinator"
     links:
       - database
       - queue
