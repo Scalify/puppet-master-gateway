@@ -19,6 +19,7 @@
 
 before_script:
   - mkdir -p $GOPATH/src/gitlab.com/$CI_PROJECT_NAMESPACE
+  - echo "Running in $GOPATH/src/gitlab.com/$CI_PROJECT_NAMESPACE"
   - ln -s $CI_PROJECT_DIR/ $GOPATH/src/gitlab.com/$CI_PROJECT_PATH
   - cd $GOPATH/src/gitlab.com/$CI_PROJECT_PATH
   - mkdir -p ~/.kube
