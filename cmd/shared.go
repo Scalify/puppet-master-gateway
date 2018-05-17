@@ -30,7 +30,10 @@ func connectJobDB(logger *logrus.Logger, cfg CouchEnv) *database.JobDB {
 		logger.Fatalf("Failed to open couchdb connection: %v", err)
 	}
 
-	couch.CreateDB("jobs", &couchdb.BasicAuth{Username: cfg.CouchDbUsername, Password: cfg.CouchDbPassword})
+	if err := couch.CreateDB("jobs", &couchdb.BasicAuth{Username: cfg.CouchDbUsername, Password: cfg.CouchDbPassword}); err != nil {
+		logger.Errorf("Failed to create database: %v", err)
+	}
+
 	db := database.NewJobDB(couch.SelectDB("jobs", &couchdb.BasicAuth{Username: cfg.CouchDbUsername, Password: cfg.CouchDbPassword}))
 	logger.Infof("Using database on http://%s:%d", cfg.CouchDbHost, cfg.CouchDbPort)
 

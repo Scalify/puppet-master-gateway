@@ -111,7 +111,7 @@ func (c *Coordinator) consumeJobResults(ctx context.Context) {
 
 		job.Status = api.JobStatusDone
 		job.Logs = result.Logs
-		job.ExitCode = result.ExitCode
+		job.Error = result.Error
 
 		if err := c.db.Save(job); err != nil {
 			l.Errorf("Failed to save job back to db: %v", err)

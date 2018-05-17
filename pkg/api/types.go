@@ -10,13 +10,13 @@ type Job struct {
 	Code      string            `json:"code"`
 	Status    string            `json:"status"`
 	Variables map[string]string `json:"variables"`
-	ExitCode  int               `json:"exit_code,omitempty"`
+	Error     string            `json:"error,omitempty"`
 	Logs      json.RawMessage   `json:"logs,omitempty"`
 }
 
 // A JobResult is emitted after a worker did the job and synced to database
 type JobResult struct {
-	JobID    string          `json:"job_id"`
-	ExitCode int             `json:"exit_code"`
-	Logs     json.RawMessage `json:"logs"`
+	JobID string          `json:"job_id"`
+	Error string          `json:"error"`
+	Logs  json.RawMessage `json:"logs"`
 }

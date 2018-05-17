@@ -29,7 +29,11 @@ var coordinatorCmd = &cobra.Command{
 		setupLogger(logger, cfg.SharedEnv)
 		db := connectJobDB(logger, cfg.CouchEnv)
 		conn, queue := connectQueue(logger, cfg.QueueEnv)
-		defer conn.Close()
+		defer func() {
+			if err := conn.Close(); err != nil {
+				logger.Fatalf("Failed to close queue connection: %v", err)
+			}
+		}()
 
 		server, err := coordinator.New(logger.WithFields(logrus.Fields{}), db, queue)
 		if err != nil {
