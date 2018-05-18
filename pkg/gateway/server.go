@@ -59,6 +59,7 @@ func (s *Server) Start(ctx context.Context, listenPort int) error {
 	return s.srv.Shutdown(ctx)
 }
 
+// Shutdown closes the http server
 func (s *Server) Shutdown(ctx context.Context) error {
 	return s.srv.Shutdown(ctx)
 }
