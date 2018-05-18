@@ -5,22 +5,9 @@
 
 .dev-only: &dev-only
   only:
-  - develop
+  - master
   - /^feature.*$/
   - /^bugfix.*$/
-
-.gometalinter-template: &gometalinter-template
-  <<: *dev-only
-  image: scalify/glide:0.13.0
-  stage: lint
-  dependencies:
-  - Get Dependencies
-  variables:
-    OPTIONS: --deadline=5m --vendor --disable-all --skip=proto --sort=severity
-  script:
-    - go get github.com/alecthomas/gometalinter
-    - gometalinter -i
-    - gometalinter $OPTIONS --enable=$CI_JOB_NAME ./...
 
 before_script:
   - mkdir -p $GOPATH/src/gitlab.com/$CI_PROJECT_NAMESPACE
@@ -30,18 +17,20 @@ before_script:
   - pwd
   - mkdir -p ~/.kube
 
+.base: &base
+  image: scalify/glide:0.13.0
+
 variables:
   CGO_ENABLED: 0
 
 stages:
   - dependencies
-  - lint
   - test
   - build
 
 Get Dependencies:
   <<: *dev-only
-  image: scalify/glide:0.13.0
+  <<: *base
   stage: dependencies
   artifacts:
     paths:
@@ -51,68 +40,19 @@ Get Dependencies:
   script:
     - glide install --strip-vendor
 
-deadcode:
-  <<: *gometalinter-template
-errcheck:
-  <<: *gometalinter-template
-vet:
-  <<: *gometalinter-template
-goconst:
-  <<: *gometalinter-template
-gocyclo:
-  <<: *gometalinter-template
-  allow_failure: true
-golint:
-  <<: *gometalinter-template
-  allow_failure: true
-ineffassign:
-  <<: *gometalinter-template
-  allow_failure: true
-misspell:
-  <<: *gometalinter-template
-  allow_failure: true
-unparam:
-  <<: *gometalinter-template
-  allow_failure: true
-dupl:
-  <<: *gometalinter-template
-  allow_failure: true
-staticcheck:
-  <<: *gometalinter-template
-  allow_failure: true
-gas:
-  <<: *gometalinter-template
-  allow_failure: true
-lll:
-  <<: *gometalinter-template
-  allow_failure: true
-goimports:
-  <<: *gometalinter-template
-  allow_failure: true
-unconvert:
-  <<: *gometalinter-template
-  allow_failure: true
-vetshadow:
-  <<: *gometalinter-template
-  allow_failure: true
-interfacer:
-  <<: *gometalinter-template
-  allow_failure: true
-gosimple:
-  <<: *gometalinter-template
-  allow_failure: true
-gotype:
-  <<: *gometalinter-template
-  allow_failure: true
-unused:
-  <<: *gometalinter-template
-  allow_failure: true
-nakedret:
-  <<: *gometalinter-template
-  allow_failure: true
+gometalinter:
+  <<: *dev-only
+  <<: *base
+  stage: test
+  dependencies:
+  - Get Dependencies
+  script:
+    - go get github.com/alecthomas/gometalinter
+    - gometalinter -i
+    - gometalinter --deadline=5m --vendor --skip=proto --sort=severity ./...
 
 Test:
-  image: scalify/glide:0.13.0
+  <<: *base
   stage: test
   dependencies:
   - Get Dependencies
@@ -122,7 +62,7 @@ Test:
   <<: *dev-only
 
 Build Application:
-  image: scalify/glide:0.13.0
+  <<: *base
   stage: test
   dependencies:
   - Get Dependencies
