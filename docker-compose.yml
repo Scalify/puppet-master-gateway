@@ -1,4 +1,4 @@
-version: "3"
+version: '3.5'
 services:
   gateway:
     build: .
@@ -61,4 +61,6 @@ services:
 
 networks:
   default: {}
-  puppet_master: {}
+  puppet_master:
+    external: false
+    name: puppet_master

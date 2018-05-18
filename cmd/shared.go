@@ -32,7 +32,13 @@ func connectJobDB(logger *logrus.Logger, cfg CouchEnv) *database.JobDB {
 
 	for _, db := range []string{"_global_changes", "_metadata", "_replicator", "_users", "jobs"} {
 		if err := couch.CreateDB(db, &couchdb.BasicAuth{Username: cfg.CouchDbUsername, Password: cfg.CouchDbPassword}); err != nil {
-			logger.Errorf("Failed to create database %s: %v", db, err)
+			if cErr, ok := err.(*couchdb.Error); ok {
+				if cErr.StatusCode == 412 {
+					logger.Debugf("Database %s already exists", db)
+					continue
+				}
+			}
+			logger.Fatalf("Failed to create database %s: %v", db, err)
 		}
 	}
 
