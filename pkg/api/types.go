@@ -13,11 +13,13 @@ type Job struct {
 	Modules map[string]string `json:"modules"`
 	Error   string            `json:"error,omitempty"`
 	Logs    json.RawMessage   `json:"logs,omitempty"`
+	Results json.RawMessage   `json:"results,omitempty"`
 }
 
 // A JobResult is emitted after a worker did the job and synced to database
 type JobResult struct {
-	JobID string          `json:"job_id"`
-	Error string          `json:"error"`
-	Logs  json.RawMessage `json:"logs"`
+	JobID   string          `json:"job_id"`
+	Error   string          `json:"error"`
+	Logs    json.RawMessage `json:"logs"`
+	Results json.RawMessage `json:"results"`
 }
