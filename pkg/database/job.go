@@ -6,16 +6,19 @@ import (
 	"gitlab.com/scalifyme/puppet-master/puppet-master/pkg/api"
 )
 
+// JobDB talks to a couchDB server and handles Job instances
 type JobDB struct {
 	db *couchdb.Database
 }
 
+// NewJobDB returns a new JobDB instance
 func NewJobDB(db *couchdb.Database) *JobDB {
 	return &JobDB{
 		db: db,
 	}
 }
 
+// Get fetches a job from database, identified by given ID
 func (db *JobDB) Get(id string) (*api.Job, error) {
 	job := &api.Job{}
 	rev, err := db.db.Read(id, job, nil)
@@ -51,6 +54,7 @@ func (db *JobDB) GetByStatus(status string, limit int) ([]*api.Job, error) {
 	return result.Docs, nil
 }
 
+// Save writes the job to DB
 func (db *JobDB) Save(job *api.Job) error {
 	if job.ID == "" {
 		job.ID = uuid.NewV4().String()
@@ -65,6 +69,7 @@ func (db *JobDB) Save(job *api.Job) error {
 	return nil
 }
 
+// Delete removes the job from the database
 func (db *JobDB) Delete(job *api.Job) error {
 	_, err := db.db.Delete(job.ID, job.Rev)
 	return db.checkKnownErrors(err)

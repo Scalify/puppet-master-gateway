@@ -11,12 +11,14 @@ import (
 	"gitlab.com/scalifyme/puppet-master/puppet-master/pkg/api"
 )
 
+// Coordinator produces queue job messages and consumes the results, like coordinating the puppets
 type Coordinator struct {
 	logger *logrus.Entry
 	db     db
 	queue  queue
 }
 
+// New returns a new coordinator instance
 func New(logger *logrus.Entry, db db, queue queue) (*Coordinator, error) {
 	coordinator := &Coordinator{
 		logger: logger,

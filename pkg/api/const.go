@@ -13,10 +13,12 @@ const (
 	QueueNameJobResults = "puppet-master-job-results"
 )
 
+// Logger field names
 const (
 	LogFieldJobID = "job_id"
 )
 
+// HTTP header constants
 const (
 	ContentTypeHeader = "Content-Type"
 	ContentTypeJSON   = "application/json"

@@ -25,7 +25,7 @@ func setupLogger(logger *logrus.Logger, cfg SharedEnv) {
 }
 
 func connectJobDB(logger *logrus.Logger, cfg CouchEnv) *database.JobDB {
-	couch, err := couchdb.NewConnection(cfg.CouchDbHost, cfg.CouchDbPort, time.Duration(1*time.Second))
+	couch, err := couchdb.NewConnection(cfg.CouchDbHost, cfg.CouchDbPort, 1*time.Second)
 	if err != nil {
 		logger.Fatalf("Failed to open couchdb connection: %v", err)
 	}
@@ -59,7 +59,7 @@ func connectQueue(logger *logrus.Logger, cfg QueueEnv) (*amqp.Connection, *amqp.
 
 func newExitHandlerContext(logger *logrus.Logger) context.Context {
 	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGKILL, syscall.SIGTERM)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	ctx, cancel := context.WithCancel(context.Background())
 
 	go func() {

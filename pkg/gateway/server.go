@@ -14,6 +14,7 @@ import (
 	"gitlab.com/scalifyme/puppet-master/puppet-master/pkg/database"
 )
 
+// Server is an http handler serving the puppet-master api
 type Server struct {
 	logger *logrus.Entry
 	db     db
@@ -28,6 +29,7 @@ func NewServer(db db, logger *logrus.Entry) (*Server, error) {
 	}, nil
 }
 
+// Start opens the http port and handles the requests
 func (s *Server) Start(ctx context.Context, listenPort int) error {
 	r := mux.NewRouter()
 	jobs := r.PathPrefix("/jobs").Subrouter()
@@ -97,7 +99,6 @@ func (s *Server) GetJob(rw http.ResponseWriter, req *http.Request) {
 
 	vars := mux.Vars(req)
 	jobID := vars["id"]
-	job := &api.Job{}
 	logger := s.logger.WithField(api.LogFieldJobID, jobID)
 
 	job, err := s.db.Get(jobID)
