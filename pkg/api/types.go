@@ -10,6 +10,7 @@ type Job struct {
 	Code      string            `json:"code"`
 	Status    string            `json:"status"`
 	Variables map[string]string `json:"variables"`
+	Modules   map[string]string `json:"modules"`
 	Error     string            `json:"error,omitempty"`
 	Logs      json.RawMessage   `json:"logs,omitempty"`
 }

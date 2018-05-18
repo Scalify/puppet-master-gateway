@@ -1,3 +1,8 @@
+.docker: &docker
+  image: docker:stable
+  services:
+    - docker:dind
+
 .dev-only: &dev-only
   only:
   - develop
@@ -128,39 +133,24 @@ Build Application:
   - GOOS=linux go build -v -ldflags '-w -extldflags '-static'' .
   <<: *dev-only
 
-Build Image and Push Dev Tag:
-  image: docker:edge-git
+build-docker-image-master:
+  <<: *docker
   stage: build
-  dependencies:
-  - Build Application
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
-  - docker build -t $REGISTRY_URL/$CI_PROJECT_NAME:$CI_BUILD_REF .
-  - docker push $REGISTRY_URL/$CI_PROJECT_NAME:$CI_BUILD_REF
-  - docker tag $REGISTRY_URL/$CI_PROJECT_NAME:$CI_BUILD_REF $REGISTRY_URL/$CI_PROJECT_NAME:dev
-  - docker push $REGISTRY_URL/$CI_PROJECT_NAME:dev
+    - docker build --pull -t "$CI_REGISTRY_IMAGE" .
+    - docker push "$CI_REGISTRY_IMAGE"
   only:
-    - develop
+    - master
 
-Push Staging Tag:
-  image: docker:edge-git
+build-docker-image-tags:
+  <<: *docker
   stage: build
-  dependencies: []
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
-      - export HASH=$(git merge-base origin/staging origin/develop)
-      - docker pull $REGISTRY_URL/$CI_PROJECT_NAME:$HASH
-      - docker tag $REGISTRY_URL/$CI_PROJECT_NAME:$HASH $REGISTRY_URL/$CI_PROJECT_NAME:staging
-      - docker push $REGISTRY_URL/$CI_PROJECT_NAME:staging
+    - docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG" .
+    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG"
   only:
-      - staging
-
-Push Latest Tag:
-  stage: build
-  image: docker:edge-git
-  dependencies: []
-  script:
-      - export HASH=$(git merge-base origin/master origin/develop)
-      - docker pull $REGISTRY_URL/$CI_PROJECT_NAME:$HASH
-      - docker tag $REGISTRY_URL/$CI_PROJECT_NAME:$HASH $REGISTRY_URL/$CI_PROJECT_NAME:latest
-      - docker push $REGISTRY_URL/$CI_PROJECT_NAME:latest
-  only:
-      - master
+    - tags
