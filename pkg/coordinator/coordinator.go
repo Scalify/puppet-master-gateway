@@ -92,8 +92,18 @@ func (c *Coordinator) consumeJobResults(ctx context.Context) {
 		case msg = <-consumer:
 		}
 
+		logger.Debugf("Consuming message from queue: %v", string(msg.Body))
+
 		if err := json.Unmarshal(msg.Body, &result); err != nil {
 			logger.Errorf("Failed to unmarshal json body: %v", err)
+			continue
+		}
+
+		if result.JobID == "" {
+			logger.Errorf("Failed to process job result: object has no jobID")
+			if err := msg.Ack(false); err != nil {
+				logger.Errorf("Failed to ack message: %v", err)
+			}
 			continue
 		}
 
@@ -119,6 +129,13 @@ func (c *Coordinator) consumeJobResults(ctx context.Context) {
 		if err := c.db.Save(job); err != nil {
 			l.Errorf("Failed to save job back to db: %v", err)
 		}
+
+		if err := msg.Ack(false); err != nil {
+			l.Errorf("Failed to ack message: %v", err)
+			continue
+		}
+
+		l.Debugf("Done processing job result")
 	}
 }
 
