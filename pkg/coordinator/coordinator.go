@@ -84,59 +84,63 @@ func (c *Coordinator) consumeJobResults(ctx context.Context) {
 	}
 
 	var msg amqp.Delivery
-	var result api.JobResult
+
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		case msg = <-consumer:
+			c.handleJobResult(logger, msg)
 		}
-
-		logger.Debugf("Consuming message from queue: %v", string(msg.Body))
-
-		if err := json.Unmarshal(msg.Body, &result); err != nil {
-			logger.Errorf("Failed to unmarshal json body: %v", err)
-			continue
-		}
-
-		if result.JobID == "" {
-			logger.Errorf("Failed to process job result: object has no jobID")
-			if err := msg.Ack(false); err != nil {
-				logger.Errorf("Failed to ack message: %v", err)
-			}
-			continue
-		}
-
-		l := logger.WithField(api.LogFieldJobID, result.JobID)
-		l.Debugf("Loading job from db")
-
-		job, err := c.db.Get(result.JobID)
-		if err != nil {
-			l.Errorf("Failed to load job from db: %v", err)
-			continue
-		}
-
-		if job.Status != api.JobStatusQueued {
-			l.Errorf("Job jas unexpected status %s, expected %s", job.Status, api.JobStatusQueued)
-			continue
-		}
-
-		job.Status = api.JobStatusDone
-		job.Logs = result.Logs
-		job.Error = result.Error
-		job.Results = result.Results
-
-		if err := c.db.Save(job); err != nil {
-			l.Errorf("Failed to save job back to db: %v", err)
-		}
-
-		if err := msg.Ack(false); err != nil {
-			l.Errorf("Failed to ack message: %v", err)
-			continue
-		}
-
-		l.Debugf("Done processing job result")
 	}
+}
+
+func (c *Coordinator) handleJobResult(logger *logrus.Entry, msg amqp.Delivery) {
+	logger.Debugf("Consuming message from queue: %v", string(msg.Body))
+
+	var result api.JobResult
+	if err := json.Unmarshal(msg.Body, &result); err != nil {
+		logger.Errorf("Failed to unmarshal json body: %v", err)
+		return
+	}
+
+	if result.JobID == "" {
+		logger.Errorf("Failed to process job result: object has no jobID")
+		if err := msg.Ack(false); err != nil {
+			logger.Errorf("Failed to ack message: %v", err)
+		}
+		return
+	}
+
+	l := logger.WithField(api.LogFieldJobID, result.JobID)
+	l.Debugf("Loading job from db")
+
+	job, err := c.db.Get(result.JobID)
+	if err != nil {
+		l.Errorf("Failed to load job from db: %v", err)
+		return
+	}
+
+	if job.Status != api.JobStatusQueued {
+		l.Errorf("Job jas unexpected status %s, expected %s", job.Status, api.JobStatusQueued)
+		return
+	}
+
+	job.Status = api.JobStatusDone
+	job.Logs = result.Logs
+	job.Error = result.Error
+	job.Results = result.Results
+
+	if err := c.db.Save(job); err != nil {
+		l.Errorf("Failed to save job back to db: %v", err)
+	}
+
+	if err := msg.Ack(false); err != nil {
+		l.Errorf("Failed to ack message: %v", err)
+		return
+	}
+
+	l.Debugf("Done processing job result")
 }
 
 func (c *Coordinator) produceJobs(ctx context.Context) {
