@@ -20,7 +20,7 @@ func NewJobDB(db *couchdb.Database) *JobDB {
 
 // Get fetches a job from database, identified by given ID
 func (db *JobDB) Get(id string) (*api.Job, error) {
-	job := &api.Job{}
+	job := api.NewJob()
 	rev, err := db.db.Read(id, job, nil)
 	if err != nil {
 		return nil, db.checkKnownErrors(err)

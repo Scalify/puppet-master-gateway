@@ -130,6 +130,8 @@ func (c *Coordinator) handleJobResult(logger *logrus.Entry, msg amqp.Delivery) {
 	job.Logs = result.Logs
 	job.Error = result.Error
 	job.Results = result.Results
+	job.FinishedAt = result.FinishedAt
+	job.Duration = result.Duration
 
 	if err := c.db.Save(job); err != nil {
 		l.Errorf("Failed to save job back to db: %v", err)

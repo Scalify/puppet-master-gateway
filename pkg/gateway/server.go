@@ -68,7 +68,7 @@ func (s *Server) Shutdown(ctx context.Context) error {
 func (s *Server) CreateJob(rw http.ResponseWriter, req *http.Request) {
 	rw.Header().Add(api.ContentTypeHeader, api.ContentTypeJSON)
 
-	job := &api.Job{}
+	job := api.NewJob()
 	if err := json.NewDecoder(req.Body).Decode(job); err != nil {
 		s.logger.Errorf("Failed to decode json body: %v", err)
 		rw.WriteHeader(http.StatusBadRequest)
@@ -77,7 +77,9 @@ func (s *Server) CreateJob(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	job.Status = api.JobStatusNew
+	job.CreatedAt = time.Now()
 	job.ID = uuid.NewV4().String()
+
 	logger := s.logger.WithField(api.LogFieldJobID, job.ID)
 
 	if err := s.db.Save(job); err != nil {
@@ -88,6 +90,7 @@ func (s *Server) CreateJob(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	logger.Debugf("Wrote job to database")
+	job.Rev = ""
 
 	if err := json.NewEncoder(rw).Encode(job); err != nil {
 		logger.Errorf("Failed to encode job: %v", err)
