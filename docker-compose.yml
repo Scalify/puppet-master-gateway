@@ -1,6 +1,7 @@
 version: '3.5'
 services:
   gateway:
+    image: registry.gitlab.com/scalifyme/puppet-master/puppet-master
     build: .
     networks:
       - puppet_master
@@ -17,6 +18,7 @@ services:
     ports:
       - "3000:3000"
   coordinator:
+    image: registry.gitlab.com/scalifyme/puppet-master/puppet-master
     build: .
     networks:
       - puppet_master
