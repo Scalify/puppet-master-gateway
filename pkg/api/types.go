@@ -21,6 +21,7 @@ type Job struct {
 	Duration   int                    `json:"duration"`
 }
 
+// NewJob creates a new Job instance
 func NewJob() *Job {
 	return &Job{
 		Vars:    make(map[string]string),
