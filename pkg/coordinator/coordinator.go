@@ -90,6 +90,10 @@ func (c *Coordinator) consumeJobResults(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case msg = <-consumer:
+			if string(msg.Body) == "" {
+				continue
+			}
+
 			c.handleJobResult(logger, msg)
 		}
 	}
