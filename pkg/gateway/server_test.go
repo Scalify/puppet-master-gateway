@@ -1,7 +1,6 @@
 package gateway
 
 import (
-	"bytes"
 	"context"
 	"net/http"
 	"net/http/httptest"
@@ -27,12 +26,11 @@ func TestServerStart(t *testing.T) {
 	go s.Start(ctx, 0)
 
 	time.Sleep(10 * time.Millisecond)
-	req := httptest.NewRequest(http.MethodPost, "/jobs", bytes.NewBuffer([]byte("{}")))
-	req.SetBasicAuth("test", "test")
+	req := httptest.NewRequest(http.MethodGet, "/healthz", nil)
 	rw := httptest.NewRecorder()
 	s.srv.Handler.ServeHTTP(rw, req)
 
-	if rw.Code != 204 {
+	if rw.Code != 200 {
 		t.Errorf("Unexpected healthz response: %v", rw.Code)
 	}
 }

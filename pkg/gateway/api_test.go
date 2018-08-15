@@ -3,11 +3,13 @@ package gateway
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
+	"github.com/Scalify/puppet-master-gateway/pkg/api"
 	internalTesting "github.com/Scalify/puppet-master-gateway/pkg/internal/testing"
 )
 
@@ -87,7 +89,7 @@ func TestServerCreateJob(t *testing.T) {
 	rw := httptest.NewRecorder()
 	s.srv.Handler.ServeHTTP(rw, req)
 
-	if rw.Code != 204 {
+	if rw.Code != 200 {
 		t.Errorf("Unexpected http response: %v", rw.Result().Status)
 	}
 
@@ -105,6 +107,15 @@ func TestServerCreateJob(t *testing.T) {
 	t.Logf("message in db: %+v", db.SavedJobs[0])
 	if db.SavedJobs[0].UUID != job.UUID {
 		t.Fatalf("Jobs are not equal: %+v , %+v", job.UUID, db.SavedJobs[0].UUID)
+	}
+
+	responseJob := &api.Job{}
+	if err := json.Unmarshal(rw.Body.Bytes(), responseJob); err != nil {
+		t.Fatalf("Failed to decode response body: %v", err)
+	}
+
+	if responseJob.UUID != job.UUID {
+		t.Fatalf("Jobs are not equal: %+v , %+v", job.UUID, responseJob.UUID)
 	}
 }
 

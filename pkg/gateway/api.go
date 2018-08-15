@@ -44,7 +44,7 @@ func (s *Server) CreateJob(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	logger.Debugf("Wrote job to database")
-	rw.WriteHeader(http.StatusNoContent)
+	rw.WriteHeader(http.StatusOK)
 	job.Rev = ""
 
 	if err := json.NewEncoder(rw).Encode(job); err != nil {

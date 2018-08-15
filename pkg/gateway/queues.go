@@ -126,10 +126,10 @@ func (s *Server) produceJobs(ctx context.Context) {
 
 		jobs, err := s.db.GetByStatus(api.JobStatusCreated, 10)
 		if err != nil {
-			logger.Fatalf("Failed to get Jobs in status new: %v", err)
+			logger.Fatalf("Failed to get created jobs: %v", err)
 		}
 
-		logger.Debugf("Got %d Jobs in state new from db.", len(jobs))
+		logger.Debugf("Got %d created jobs from db.", len(jobs))
 
 		for _, job := range jobs {
 			l := logger.WithField(api.LogFieldJobID, job.UUID)
