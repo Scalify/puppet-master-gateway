@@ -34,17 +34,12 @@ type jobList struct {
 	Docs []*api.Job `json:"docs"`
 }
 
-// GetByStatus returns
-func (db *JobDB) GetByStatus(status string, limit int) ([]*api.Job, error) {
+func (db *JobDB) getListBy(selector map[string]interface{}, page, perPage int) ([]*api.Job, error) {
 	result := &jobList{}
 	query := &couchdb.FindQueryParams{
-		Selector: map[string]interface{}{
-			"status": map[string]interface{}{
-				"$eq": status,
-			},
-		},
-		Limit: limit,
-		Skip:  0,
+		Selector: selector,
+		Limit: perPage,
+		Skip:  perPage * (page - 1),
 	}
 
 	if err := db.db.Find(result, query); err != nil {
@@ -52,6 +47,22 @@ func (db *JobDB) GetByStatus(status string, limit int) ([]*api.Job, error) {
 	}
 
 	return result.Docs, nil
+}
+
+// GetListByStatus returns a paginated list of jobs with the given status
+func (db *JobDB) GetListByStatus(status string, page, perPage int) ([]*api.Job, error) {
+	selector := map[string]interface{}{
+		"status": map[string]interface{}{
+			"$eq": status,
+		},
+	}
+
+	return db.getListBy(selector, page, perPage)
+}
+
+// GetList returns a paginated list of jobs
+func (db *JobDB) GetList(page, perPage int) ([]*api.Job, error) {
+	return db.getListBy(map[string]interface{}{}, page, perPage)
 }
 
 // Save writes the job to DB

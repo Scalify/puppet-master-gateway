@@ -19,8 +19,13 @@ func NewTestDB() *TestDB {
 	}
 }
 
-// GetByStatus returns all jobs withing the Jobs field
-func (t *TestDB) GetByStatus(status string, limit int) ([]*api.Job, error) {
+// GetListByStatus returns all jobs withing the Jobs field
+func (t *TestDB) GetListByStatus(status string, page, perPage int) ([]*api.Job, error) {
+	return t.Jobs, nil
+}
+
+// GetList returns all jobs withing the Jobs field
+func (t *TestDB) GetList(page, perPage int) ([]*api.Job, error) {
 	return t.Jobs, nil
 }
 

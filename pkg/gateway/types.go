@@ -6,7 +6,8 @@ import (
 )
 
 type db interface {
-	GetByStatus(status string, limit int) ([]*api.Job, error)
+	GetList(page, perPage int) ([]*api.Job, error)
+	GetListByStatus(status string, page, perPage int) ([]*api.Job, error)
 	Get(id string) (*api.Job, error)
 	Save(job *api.Job) error
 	Delete(job *api.Job) error

@@ -138,9 +138,9 @@ func (s *Server) produceJobs(ctx context.Context) {
 		case <-ticker.C:
 		}
 
-		jobs, err := s.db.GetByStatus(api.JobStatusCreated, 10)
+		jobs, err := s.db.GetListByStatus(api.JobStatusCreated, 1, 100)
 		if err != nil {
-			logger.Fatalf("Failed to get created jobs: %v", err)
+			logger.Errorf("Failed to get created jobs: %v", err)
 		}
 
 		logger.Debugf("Got %d created jobs from db.", len(jobs))

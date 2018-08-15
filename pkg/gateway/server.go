@@ -37,6 +37,7 @@ func (s *Server) Start(ctx context.Context, listenPort int) error {
 
 	jobs := r.PathPrefix("/jobs").Subrouter()
 	jobs.Use(basicAuth.Middleware)
+	jobs.HandleFunc("", s.GetJobs).Methods(http.MethodGet)
 	jobs.HandleFunc("", s.CreateJob).Methods(http.MethodPost)
 	jobs.HandleFunc("/{id}", s.GetJob).Methods(http.MethodGet)
 	jobs.HandleFunc("/{id}", s.DeleteJob).Methods(http.MethodDelete)

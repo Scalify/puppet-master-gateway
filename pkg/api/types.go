@@ -99,3 +99,8 @@ type Log struct {
 type JobResponse struct {
 	Data *Job `json:"data"`
 }
+
+// JobsResponse is the wrapper around a list of jobs when returned through API
+type JobsResponse struct {
+	Data []*Job `json:"data"`
+}
