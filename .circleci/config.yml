@@ -28,6 +28,7 @@ jobs:
             gometalinter --deadline=5m --vendor --skip=proto --sort=severity ./...
 
       - deploy:
+          name: push docker images
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
               export DOCKER_REPO=${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}

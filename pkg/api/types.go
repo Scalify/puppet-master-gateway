@@ -32,6 +32,7 @@ func NewJob() *Job {
 }
 
 // Equal returns true when both given Jobs are equal
+// nolint: gocyclo
 func (j *Job) Equal(j2 *Job) bool {
 	return j.UUID == j2.UUID &&
 		j.Code == j2.Code &&

@@ -20,7 +20,9 @@ func (s *Server) CreateJob(rw http.ResponseWriter, req *http.Request) {
 	if err := json.NewDecoder(req.Body).Decode(job); err != nil {
 		s.logger.Errorf("Failed to decode json body: %v", err)
 		rw.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(rw, jsonErrFailedToDecodeBody, err)
+		if _, errw := fmt.Fprintf(rw, jsonErrFailedToDecodeBody, err); errw != nil {
+			s.logger.Error(errw)
+		}
 		return
 	}
 
@@ -35,7 +37,9 @@ func (s *Server) CreateJob(rw http.ResponseWriter, req *http.Request) {
 	if err := s.db.Save(job); err != nil {
 		logger.Errorf("Failed to save job: %v", err)
 		rw.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(rw, jsonErrFailedToSaveJob, err)
+		if _, errw := fmt.Fprintf(rw, jsonErrFailedToSaveJob, err); errw != nil {
+			s.logger.Error(errw)
+		}
 		return
 	}
 
@@ -61,13 +65,17 @@ func (s *Server) GetJob(rw http.ResponseWriter, req *http.Request) {
 		if err == database.ErrNotFound {
 			logger.Debugf("Failed to find job in database")
 			rw.WriteHeader(http.StatusNotFound)
-			fmt.Fprintf(rw, jsonErrJobNotFound, jobID, err)
+			if _, errw := fmt.Fprintf(rw, jsonErrJobNotFound, jobID, err); errw != nil {
+				s.logger.Error(errw)
+			}
 			return
 		}
 
 		logger.Errorf("Failed to load job: %v", err)
 		rw.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(rw, jsonErrFailedToFetchJob, err)
+		if _, errw := fmt.Fprintf(rw, jsonErrFailedToFetchJob, err); errw != nil {
+			s.logger.Error(errw)
+		}
 		return
 	}
 
@@ -93,20 +101,26 @@ func (s *Server) DeleteJob(rw http.ResponseWriter, req *http.Request) {
 		if err == database.ErrNotFound {
 			logger.Debugf("Failed to find job in database")
 			rw.WriteHeader(http.StatusNotFound)
-			fmt.Fprintf(rw, jsonErrJobNotFound, jobID, err)
+			if _, errw := fmt.Fprintf(rw, jsonErrJobNotFound, jobID, err); errw != nil {
+				s.logger.Error(errw)
+			}
 			return
 		}
 
 		logger.Errorf("Failed to load job: %v", err)
 		rw.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(rw, jsonErrFailedToFetchJob, err)
+		if _, errw := fmt.Fprintf(rw, jsonErrFailedToFetchJob, err); errw != nil {
+			s.logger.Error(errw)
+		}
 		return
 	}
 
 	if err := s.db.Delete(job); err != nil {
 		logger.Errorf("Failed to delete job: %v", err)
 		rw.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(rw, jsonErrFailedToDeleteJob, err)
+		if _, errw := fmt.Fprintf(rw, jsonErrFailedToDeleteJob, err); errw != nil {
+			s.logger.Error(errw)
+		}
 		return
 	}
 

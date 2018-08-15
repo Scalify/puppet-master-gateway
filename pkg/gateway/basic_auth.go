@@ -8,14 +8,13 @@ import (
 )
 
 type basicAuthMiddleware struct {
-	logger *logrus.Entry
-	handler http.Handler
+	logger             *logrus.Entry
 	username, password string
 }
 
-func newBasicAuth(logger *logrus.Entry, username, password string) *basicAuthMiddleware{
+func newBasicAuth(logger *logrus.Entry, username, password string) *basicAuthMiddleware {
 	return &basicAuthMiddleware{
-		logger: logger,
+		logger:   logger,
 		username: username,
 		password: password,
 	}
