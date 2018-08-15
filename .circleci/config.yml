@@ -50,3 +50,8 @@ workflows:
     jobs:
       - build:
           context: docker
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              only: /.*/
