@@ -31,7 +31,7 @@ jobs:
           name: push docker images
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              export DOCKER_REPO=${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
+              export DOCKER_REPO=$(echo "${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}" | awk '{print tolower($0)}')
 
               docker build -t ${DOCKER_REPO} .
               docker login -u ${DOCKER_USER} -p ${DOCKER_PASS} https://index.docker.io/v1/
