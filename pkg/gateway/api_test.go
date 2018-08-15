@@ -109,13 +109,13 @@ func TestServerCreateJob(t *testing.T) {
 		t.Fatalf("Jobs are not equal: %+v , %+v", job.UUID, db.SavedJobs[0].UUID)
 	}
 
-	responseJob := &api.Job{}
+	responseJob := &api.JobResponse{}
 	if err := json.Unmarshal(rw.Body.Bytes(), responseJob); err != nil {
 		t.Fatalf("Failed to decode response body: %v", err)
 	}
 
-	if responseJob.UUID != job.UUID {
-		t.Fatalf("Jobs are not equal: %+v , %+v", job.UUID, responseJob.UUID)
+	if responseJob.Data.UUID != job.UUID {
+		t.Fatalf("Jobs are not equal: %+v , %+v", job.UUID, responseJob.Data.UUID)
 	}
 }
 
@@ -151,6 +151,15 @@ func TestServerGetJob(t *testing.T) {
 
 	if rw.Body.String() == "" {
 		t.Errorf("Unexpected GetJob response: %q", rw.Body.String())
+	}
+
+	responseJob := &api.JobResponse{}
+	if err := json.Unmarshal(rw.Body.Bytes(), responseJob); err != nil {
+		t.Fatalf("Failed to decode response body: %v", err)
+	}
+
+	if responseJob.Data.UUID != job.UUID {
+		t.Fatalf("Jobs are not equal: %+v , %+v", job.UUID, responseJob.Data.UUID)
 	}
 }
 
