@@ -68,6 +68,12 @@ func (s *Server) consumeJobResults(ctx context.Context) {
 	}
 }
 
+func (s *Server) nack(logger *logrus.Entry, msg amqp.Delivery, requeue bool) {
+	if err := msg.Nack(false, requeue); err != nil {
+		logger.Errorf("Failed to nack message (requeue=%v): %v", err, requeue)
+	}
+}
+
 func (s *Server) handleJobResult(logger *logrus.Entry, msg amqp.Delivery) {
 	logger.Debugf("Consuming message from queue: %v", string(msg.Body))
 
@@ -79,9 +85,7 @@ func (s *Server) handleJobResult(logger *logrus.Entry, msg amqp.Delivery) {
 
 	if result.UUID == "" {
 		logger.Errorf("Failed to process job result: object has no UUID")
-		if err := msg.Ack(false); err != nil {
-			logger.Errorf("Failed to ack message: %v", err)
-		}
+		s.nack(logger, msg, false)
 		return
 	}
 
@@ -91,6 +95,13 @@ func (s *Server) handleJobResult(logger *logrus.Entry, msg amqp.Delivery) {
 	job, err := s.db.Get(result.UUID)
 	if err != nil {
 		l.Errorf("Failed to load job from db: %v", err)
+		s.nack(logger, msg, true)
+		return
+	}
+
+	if job.Status == api.JobStatusDone {
+		l.Error("Consumed job result was already persisted - at least the job has the status == done.")
+		s.nack(logger, msg, false)
 		return
 	}
 
@@ -98,11 +109,14 @@ func (s *Server) handleJobResult(logger *logrus.Entry, msg amqp.Delivery) {
 	job.Logs = result.Logs
 	job.Error = result.Error
 	job.Results = result.Results
+	job.StartedAt = result.StartedAt
 	job.FinishedAt = result.FinishedAt
 	job.Duration = result.Duration
 
 	if err := s.db.Save(job); err != nil {
 		l.Errorf("Failed to save job back to db: %v", err)
+		s.nack(logger, msg, true)
+		return
 	}
 
 	if err := msg.Ack(false); err != nil {
@@ -115,7 +129,7 @@ func (s *Server) handleJobResult(logger *logrus.Entry, msg amqp.Delivery) {
 
 func (s *Server) produceJobs(ctx context.Context) {
 	logger := s.logger.WithField(task, taskProduceJobs)
-	ticker := time.NewTicker(10 * time.Second)
+	ticker := time.NewTicker(1 * time.Second)
 
 	for {
 		select {
@@ -136,6 +150,11 @@ func (s *Server) produceJobs(ctx context.Context) {
 			if err := s.publishNewJob(job); err != nil {
 				l.Errorf("Failed to queue job: %v", err)
 				continue
+			}
+
+			job.Status = api.JobStatusQueued
+			if err := s.db.Save(job); err != nil {
+				l.Errorf("Failed to save updated job: %v", err)
 			}
 
 			l.Debugf("Queued job.")
