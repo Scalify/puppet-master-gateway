@@ -43,11 +43,9 @@ func (s *Server) CreateJob(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	logger.Debugf("Wrote job to database")
-	rw.WriteHeader(http.StatusOK)
 	job.Rev = ""
-
-	if err := json.NewEncoder(rw).Encode(job); err != nil {
+	jobResponse := &api.JobResponse{Data: job}
+	if err := json.NewEncoder(rw).Encode(jobResponse); err != nil {
 		logger.Errorf("Failed to encode job: %v", err)
 	}
 }
@@ -80,8 +78,8 @@ func (s *Server) GetJob(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	job.Rev = ""
-
-	if err := json.NewEncoder(rw).Encode(job); err != nil {
+	jobResponse := &api.JobResponse{Data: job}
+	if err := json.NewEncoder(rw).Encode(jobResponse); err != nil {
 		logger.Errorf("Failed to encode job: %v", err)
 	}
 

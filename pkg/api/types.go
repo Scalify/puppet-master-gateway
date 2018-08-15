@@ -94,3 +94,8 @@ type Log struct {
 	Level   string    `json:"level"`
 	Message string    `json:"message"`
 }
+
+// JobResponse is the wrapper around a job when returned through API
+type JobResponse struct {
+	Data *Job `json:"data"`
+}
