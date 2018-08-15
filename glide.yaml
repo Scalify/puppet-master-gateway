@@ -1,4 +1,4 @@
-package: gitlab.com/scalifyme/puppet-master/puppet-master
+package: github.com/Scalify/puppet-master-gateway
 import:
 - package: github.com/spf13/cobra
 - package: github.com/Sirupsen/logrus

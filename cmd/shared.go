@@ -8,14 +8,14 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Scalify/puppet-master-gateway/pkg/database"
 	"github.com/Sirupsen/logrus"
 	"github.com/rhinoman/couchdb-go"
 	"github.com/streadway/amqp"
-	"gitlab.com/scalifyme/puppet-master/puppet-master/pkg/database"
 )
 
-func setupLogger(logger *logrus.Logger, cfg SharedEnv) {
-	if cfg.Verbose {
+func setupLogger(logger *logrus.Logger, verbose bool) {
+	if verbose {
 		logger.SetLevel(logrus.DebugLevel)
 		logger.Debug("Starting in debug level")
 	} else {
@@ -24,7 +24,24 @@ func setupLogger(logger *logrus.Logger, cfg SharedEnv) {
 	}
 }
 
-func connectJobDB(logger *logrus.Logger, cfg CouchEnv) *database.JobDB {
+func connectQueue(logger *logrus.Logger, user, password, host string, port int) (*amqp.Connection, *amqp.Channel) {
+	queueURI := fmt.Sprintf("amqp://%s:%s@%s:%d", user, password, host, port)
+	logger.Infof("Using Queue on %s", queueURI)
+
+	queueConn, err := amqp.Dial(queueURI)
+	if err != nil {
+		logger.Fatalf("Failed to connect to queue: %v", err)
+	}
+
+	queueChannel, err := queueConn.Channel()
+	if err != nil {
+		logger.Fatalf("Failed to open channel on queue connection: %v", err)
+	}
+
+	return queueConn, queueChannel
+}
+
+func connectJobDB(logger *logrus.Logger, cfg env) *database.JobDB {
 	couch, err := couchdb.NewConnection(cfg.CouchDbHost, cfg.CouchDbPort, 1*time.Second)
 	if err != nil {
 		logger.Fatalf("Failed to open couchdb connection: %v", err)
@@ -46,23 +63,6 @@ func connectJobDB(logger *logrus.Logger, cfg CouchEnv) *database.JobDB {
 	logger.Infof("Using database on http://%s:%d", cfg.CouchDbHost, cfg.CouchDbPort)
 
 	return db
-}
-
-func connectQueue(logger *logrus.Logger, cfg QueueEnv) (*amqp.Connection, *amqp.Channel) {
-	queueURI := fmt.Sprintf("amqp://%s:%s@%s:%d", cfg.QueueUsername, cfg.QueuePassword, cfg.QueueHost, cfg.QueuePort)
-	logger.Infof("Using Queue on %s", queueURI)
-
-	queueConn, err := amqp.Dial(queueURI)
-	if err != nil {
-		logger.Fatalf("Failed to connect to queue: %v", err)
-	}
-
-	queueChannel, err := queueConn.Channel()
-	if err != nil {
-		logger.Fatalf("Failed to open channel on queue connection: %v", err)
-	}
-
-	return queueConn, queueChannel
 }
 
 func newExitHandlerContext(logger *logrus.Logger) context.Context {

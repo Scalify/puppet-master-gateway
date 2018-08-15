@@ -1,5 +1,5 @@
-hash: 3192870c45b49494712cdfe1ce6c1886799811ec54e6a5f7d24b0baec28666cd
-updated: 2018-05-12T11:58:45.369560348+02:00
+hash: 45020dbd8a38e5e662caf4ce7da62d46a3591db2dc9a59ffb1e73578944eeb2b
+updated: 2018-08-15T10:58:41.347734993+02:00
 imports:
 - name: github.com/gorilla/context
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
@@ -14,7 +14,7 @@ imports:
 - name: github.com/satori/go.uuid
   version: f58768cc1a7a7e77a3bd49e98cdd21419399b6a3
 - name: github.com/Sirupsen/logrus
-  version: c155da19408a8799da419ed3eeb0cb5db0ad5dbc
+  version: 3e01752db0189b9157070a0e1668a620f9a85da2
 - name: github.com/spf13/cobra
   version: ef82de70bb3f60c65fb8eebacbb2d122ef517385
 - name: github.com/spf13/pflag

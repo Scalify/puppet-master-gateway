@@ -2,42 +2,49 @@ package gateway
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
-	"github.com/satori/go.uuid"
-	"gitlab.com/scalifyme/puppet-master/puppet-master/pkg/api"
-	"gitlab.com/scalifyme/puppet-master/puppet-master/pkg/database"
 )
 
 // Server is an http handler serving the puppet-master api
 type Server struct {
-	logger *logrus.Entry
-	db     db
-	srv    *http.Server
+	logger                   *logrus.Entry
+	db                       db
+	queue                    queue
+	srv                      *http.Server
+	basicUser, basicPassword string
 }
 
 // NewServer creates a new server
-func NewServer(db db, logger *logrus.Entry) (*Server, error) {
+func NewServer(db db, queue queue, logger *logrus.Entry, basicUser, basicPassword string) (*Server, error) {
 	return &Server{
-		logger: logger,
-		db:     db,
+		logger:        logger,
+		queue:         queue,
+		db:            db,
+		basicUser:     basicUser,
+		basicPassword: basicPassword,
 	}, nil
 }
 
 // Start opens the http port and handles the requests
 func (s *Server) Start(ctx context.Context, listenPort int) error {
 	r := mux.NewRouter()
-	jobs := r.PathPrefix("/jobs").Subrouter()
-	jobs.Methods(http.MethodGet).Path("/{id}").HandlerFunc(s.GetJob)
-	jobs.Methods(http.MethodPost).Path("/").HandlerFunc(s.CreateJob)
+	basicAuth := newBasicAuth(s.logger, s.basicUser, s.basicPassword)
 
-	r.Methods(http.MethodGet).Path("/_healthz").HandlerFunc(func(rw http.ResponseWriter, _ *http.Request) {
-		fmt.Fprint(rw, "ok")
+	jobs := r.PathPrefix("/jobs").Subrouter()
+	jobs.Use(basicAuth.Middleware)
+	jobs.HandleFunc("", s.CreateJob).Methods(http.MethodPost)
+	jobs.HandleFunc("/{id}", s.GetJob).Methods(http.MethodGet)
+	jobs.HandleFunc("/{id}", s.DeleteJob).Methods(http.MethodDelete)
+
+	r.Methods(http.MethodGet).Path("/healthz").HandlerFunc(func(rw http.ResponseWriter, _ *http.Request) {
+		if _, err := fmt.Fprint(rw, "ok"); err != nil {
+			s.logger.Errorf("Failed to send ok: %v", err)
+		}
 	})
 
 	s.srv = &http.Server{
@@ -48,83 +55,27 @@ func (s *Server) Start(ctx context.Context, listenPort int) error {
 		Handler:      r,
 	}
 
-	if err := s.srv.ListenAndServe(); err != nil {
+	if err := s.ensureQueues(); err != nil {
 		return err
 	}
 
-	<-ctx.Done()
+	go func() {
+		<-ctx.Done()
 
-	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
-	defer cancel()
-	return s.srv.Shutdown(ctx)
+		ctxCancel, cancel := context.WithTimeout(ctx, 10*time.Second)
+		defer cancel()
+		if err := s.srv.Shutdown(ctxCancel); err != nil {
+			s.logger.Errorf("Failed to shutdown server: %v", err)
+		}
+	}()
+
+	go s.consumeJobResults(ctx)
+	go s.produceJobs(ctx)
+
+	return s.srv.ListenAndServe()
 }
 
 // Shutdown closes the http server
 func (s *Server) Shutdown(ctx context.Context) error {
 	return s.srv.Shutdown(ctx)
-}
-
-// CreateJob stores a job in the database and starts a job worker for it
-func (s *Server) CreateJob(rw http.ResponseWriter, req *http.Request) {
-	rw.Header().Add(api.ContentTypeHeader, api.ContentTypeJSON)
-
-	job := api.NewJob()
-	if err := json.NewDecoder(req.Body).Decode(job); err != nil {
-		s.logger.Errorf("Failed to decode json body: %v", err)
-		rw.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(rw, jsonErrFailedToDecodeBody, err)
-		return
-	}
-
-	job.Status = api.JobStatusNew
-	job.CreatedAt = time.Now()
-	job.ID = uuid.NewV4().String()
-
-	logger := s.logger.WithField(api.LogFieldJobID, job.ID)
-
-	if err := s.db.Save(job); err != nil {
-		logger.Errorf("Failed to save job: %v", err)
-		rw.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(rw, jsonErrFailedToSaveJob, err)
-		return
-	}
-
-	logger.Debugf("Wrote job to database")
-	job.Rev = ""
-
-	if err := json.NewEncoder(rw).Encode(job); err != nil {
-		logger.Errorf("Failed to encode job: %v", err)
-	}
-}
-
-// GetJob reads the job from the database and returns it
-func (s *Server) GetJob(rw http.ResponseWriter, req *http.Request) {
-	rw.Header().Add(api.ContentTypeHeader, api.ContentTypeJSON)
-
-	vars := mux.Vars(req)
-	jobID := vars["id"]
-	logger := s.logger.WithField(api.LogFieldJobID, jobID)
-
-	job, err := s.db.Get(jobID)
-	if err != nil {
-		if err == database.ErrNotFound {
-			logger.Debugf("Failed to find job in database")
-			rw.WriteHeader(http.StatusNotFound)
-			fmt.Fprintf(rw, jsonErrJobNotFound, jobID, err)
-			return
-		}
-
-		logger.Errorf("Failed to load job: %v", err)
-		rw.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(rw, jsonErrFailedToFetchJob, err)
-		return
-	}
-
-	job.Rev = ""
-
-	if err := json.NewEncoder(rw).Encode(job); err != nil {
-		logger.Errorf("Failed to encode job: %v", err)
-	}
-
-	logger.Debugf("Loaded job from database and sent to client")
 }

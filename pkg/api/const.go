@@ -2,9 +2,8 @@ package api
 
 // Job status
 const (
-	JobStatusNew    = "new"
-	JobStatusQueued = "queued"
-	JobStatusDone   = "done"
+	JobStatusCreated = "created"
+	JobStatusDone    = "done"
 )
 
 // Job queue names

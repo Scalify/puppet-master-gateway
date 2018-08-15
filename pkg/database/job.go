@@ -1,9 +1,9 @@
 package database
 
 import (
+	"github.com/Scalify/puppet-master-gateway/pkg/api"
 	"github.com/rhinoman/couchdb-go"
 	"github.com/satori/go.uuid"
-	"gitlab.com/scalifyme/puppet-master/puppet-master/pkg/api"
 )
 
 // JobDB talks to a couchDB server and handles Job instances
@@ -18,7 +18,7 @@ func NewJobDB(db *couchdb.Database) *JobDB {
 	}
 }
 
-// Get fetches a job from database, identified by given ID
+// Get fetches a job from database, identified by given UUID
 func (db *JobDB) Get(id string) (*api.Job, error) {
 	job := api.NewJob()
 	rev, err := db.db.Read(id, job, nil)
@@ -56,11 +56,11 @@ func (db *JobDB) GetByStatus(status string, limit int) ([]*api.Job, error) {
 
 // Save writes the job to DB
 func (db *JobDB) Save(job *api.Job) error {
-	if job.ID == "" {
-		job.ID = uuid.NewV4().String()
+	if job.UUID == "" {
+		job.UUID = uuid.NewV4().String()
 	}
 
-	rev, err := db.db.Save(job, job.ID, job.Rev)
+	rev, err := db.db.Save(job, job.UUID, job.Rev)
 	if err != nil {
 		return err
 	}
@@ -71,7 +71,7 @@ func (db *JobDB) Save(job *api.Job) error {
 
 // Delete removes the job from the database
 func (db *JobDB) Delete(job *api.Job) error {
-	_, err := db.db.Delete(job.ID, job.Rev)
+	_, err := db.db.Delete(job.UUID, job.Rev)
 	return db.checkKnownErrors(err)
 }
 
