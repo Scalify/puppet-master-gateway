@@ -1,0 +1,43 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.10
+    working_directory: /go/src/github.com/Scalify/puppet-master-gateway
+
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+
+      - run:
+          name: install dependencies
+          command: |
+            curl https://glide.sh/get | sh
+            glide install --strip-vendor
+
+      - run:
+          name: run tests
+          command: go test -v ./...
+
+      - run:
+          name: gometalinter
+          command: |
+            go get github.com/alecthomas/gometalinter
+            gometalinter -i
+            gometalinter --deadline=5m --vendor --skip=proto --sort=severity ./...
+
+      - deploy:
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              export DOCKER_REPO=${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
+
+              docker build -t ${DOCKER_REPO} .
+              docker login -u ${DOCKER_USER} -p ${DOCKER_PASS} https://index.docker.io/v1/
+              docker push ${DOCKER_REPO}
+
+              if [ -n "${CIRCLE_TAG}" ]; then
+                docker tag ${DOCKER_REPO} ${DOCKER_REPO}:${CIRCLE_TAG}
+                docker push ${DOCKER_REPO}:${CIRCLE_TAG}
+              fi
+            fi
