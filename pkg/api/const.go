@@ -3,7 +3,7 @@ package api
 // Job status
 const (
 	JobStatusCreated = "created"
-	JobStatusQueued    = "queued"
+	JobStatusQueued  = "queued"
 	JobStatusDone    = "done"
 )
 

@@ -8,17 +8,17 @@ import (
 )
 
 type env struct {
-	ListenPort        int    `default:"3000" split_words:"true"`
-	Verbose           bool   `default:"false" split_words:"true"`
-	QueueHost         string `required:"true" split_words:"true"`
-	QueuePort         int    `required:"true" split_words:"true"`
-	QueueUsername     string `required:"true" split_words:"true"`
-	QueuePassword     string `required:"true" split_words:"true"`
-	CouchDbHost       string `required:"true" split_words:"true"`
-	CouchDbPort       int    `required:"true" split_words:"true"`
-	CouchDbUsername   string `required:"true" split_words:"true"`
-	CouchDbPassword   string `required:"true" split_words:"true"`
-	ApiToken          string `required:"true" split_words:"true"`
+	ListenPort      int    `default:"3000" split_words:"true"`
+	Verbose         bool   `default:"false" split_words:"true"`
+	QueueHost       string `required:"true" split_words:"true"`
+	QueuePort       int    `required:"true" split_words:"true"`
+	QueueUsername   string `required:"true" split_words:"true"`
+	QueuePassword   string `required:"true" split_words:"true"`
+	CouchDbHost     string `required:"true" split_words:"true"`
+	CouchDbPort     int    `required:"true" split_words:"true"`
+	CouchDbUsername string `required:"true" split_words:"true"`
+	CouchDbPassword string `required:"true" split_words:"true"`
+	APIToken        string `required:"true" split_words:"true"`
 }
 
 // gatewayCmd represents the gateway command
@@ -44,7 +44,7 @@ var gatewayCmd = &cobra.Command{
 		setupLogger(logger, cfg.Verbose)
 		db := connectJobDB(logger, cfg)
 
-		server, err := gateway.NewServer(db, queue, logger.WithFields(logrus.Fields{}), cfg.ApiToken)
+		server, err := gateway.NewServer(db, queue, logger.WithFields(logrus.Fields{}), cfg.APIToken)
 		if err != nil {
 			logger.Fatalf("Failed to create gateway: %v", err)
 		}

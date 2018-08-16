@@ -1,7 +1,6 @@
 package gateway
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -9,7 +8,7 @@ import (
 )
 
 const (
-	autHeaderSchema string = "Bearer "
+	autHeaderSchema = "Bearer "
 )
 
 type authHandlerMiddleware struct {
@@ -49,8 +48,4 @@ func (m authHandlerMiddleware) Middleware(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 	})
-}
-
-func addApiTokenHeader(r *http.Request, apiToken string) {
-	r.Header.Add("Authorization", fmt.Sprintf("Bearer %s", apiToken))
 }

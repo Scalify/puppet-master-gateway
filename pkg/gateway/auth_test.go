@@ -1,12 +1,17 @@
 package gateway
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	internalTesting "github.com/Scalify/puppet-master-gateway/pkg/internal/testing"
 )
+
+func addAPITokenHeader(r *http.Request, apiToken string) {
+	r.Header.Add("Authorization", fmt.Sprintf("Bearer %s", apiToken))
+}
 
 type testHandler struct {
 	request bool
@@ -45,7 +50,7 @@ func TestAuthHandlerWrongAuth(t *testing.T) {
 	_, l := internalTesting.NewTestLogger()
 	b := newAuthHandler(l, "asdf")
 
-	addApiTokenHeader(req, "qwertz")
+	addAPITokenHeader(req, "qwertz")
 	b.Middleware(h).ServeHTTP(rw, req)
 
 	if h.request {
@@ -68,7 +73,7 @@ func TestAuthHandler(t *testing.T) {
 	_, l := internalTesting.NewTestLogger()
 	b := newAuthHandler(l, "test")
 
-	addApiTokenHeader(req, "test")
+	addAPITokenHeader(req, "test")
 	b.Middleware(h).ServeHTTP(rw, req)
 
 	if !h.request {

@@ -38,8 +38,8 @@ func (db *JobDB) getListBy(selector map[string]interface{}, page, perPage int) (
 	result := &jobList{}
 	query := &couchdb.FindQueryParams{
 		Selector: selector,
-		Limit: perPage,
-		Skip:  perPage * (page - 1),
+		Limit:    perPage,
+		Skip:     perPage * (page - 1),
 	}
 
 	if err := db.db.Find(result, query); err != nil {

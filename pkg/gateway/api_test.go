@@ -85,7 +85,7 @@ func TestServerCreateJob(t *testing.T) {
 
 	job, b := newTestJob(t, "asdf-1234-asdf-1234")
 	req := httptest.NewRequest(http.MethodPost, "/jobs", bytes.NewReader(b))
-	addApiTokenHeader(req, "test")
+	addAPITokenHeader(req, "test")
 	rw := httptest.NewRecorder()
 	s.srv.Handler.ServeHTTP(rw, req)
 
@@ -139,7 +139,7 @@ func TestServerGetJob(t *testing.T) {
 	db.Jobs = append(db.Jobs, job)
 
 	req := httptest.NewRequest(http.MethodGet, "/jobs/asdf-1234-asdf-1234", nil)
-	addApiTokenHeader(req, "test")
+	addAPITokenHeader(req, "test")
 	rw := httptest.NewRecorder()
 	s.srv.Handler.ServeHTTP(rw, req)
 
@@ -184,7 +184,7 @@ func TestServerGetJobs(t *testing.T) {
 	db.Jobs = append(db.Jobs, job1, job2)
 
 	req := httptest.NewRequest(http.MethodGet, "/jobs", nil)
-	addApiTokenHeader(req, "test")
+	addAPITokenHeader(req, "test")
 	rw := httptest.NewRecorder()
 	s.srv.Handler.ServeHTTP(rw, req)
 
@@ -237,7 +237,7 @@ func TestServerDeleteJob(t *testing.T) {
 	db.Jobs = append(db.Jobs, job)
 
 	req := httptest.NewRequest(http.MethodDelete, "/jobs/asdf-1234-asdf-1234", nil)
-	addApiTokenHeader(req, "test")
+	addAPITokenHeader(req, "test")
 	rw := httptest.NewRecorder()
 	s.srv.Handler.ServeHTTP(rw, req)
 
