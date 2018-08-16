@@ -18,7 +18,7 @@ func TestServerStartUnauthorizedJobs(t *testing.T) {
 	db := internalTesting.NewTestDB()
 	_, l := internalTesting.NewTestLogger()
 
-	s, err := NewServer(db, q, l, "test", "test")
+	s, err := NewServer(db, q, l, "test")
 	if err != nil {
 		t.Log(err)
 		t.Fatal(err)
@@ -45,7 +45,7 @@ func TestServerStartUnauthorizedHealthz(t *testing.T) {
 	db := internalTesting.NewTestDB()
 	_, l := internalTesting.NewTestLogger()
 
-	s, err := NewServer(db, q, l, "test", "test")
+	s, err := NewServer(db, q, l, "test")
 	if err != nil {
 		t.Log(err)
 		t.Fatal(err)
@@ -72,7 +72,7 @@ func TestServerCreateJob(t *testing.T) {
 	db := internalTesting.NewTestDB()
 	_, l := internalTesting.NewTestLogger()
 
-	s, err := NewServer(db, q, l, "test", "test")
+	s, err := NewServer(db, q, l, "test")
 	if err != nil {
 		t.Log(err)
 		t.Fatal(err)
@@ -85,7 +85,7 @@ func TestServerCreateJob(t *testing.T) {
 
 	job, b := newTestJob(t, "asdf-1234-asdf-1234")
 	req := httptest.NewRequest(http.MethodPost, "/jobs", bytes.NewReader(b))
-	req.SetBasicAuth("test", "test")
+	addApiTokenHeader(req, "test")
 	rw := httptest.NewRecorder()
 	s.srv.Handler.ServeHTTP(rw, req)
 
@@ -124,7 +124,7 @@ func TestServerGetJob(t *testing.T) {
 	db := internalTesting.NewTestDB()
 	_, l := internalTesting.NewTestLogger()
 
-	s, err := NewServer(db, q, l, "test", "test")
+	s, err := NewServer(db, q, l, "test")
 	if err != nil {
 		t.Log(err)
 		t.Fatal(err)
@@ -139,7 +139,7 @@ func TestServerGetJob(t *testing.T) {
 	db.Jobs = append(db.Jobs, job)
 
 	req := httptest.NewRequest(http.MethodGet, "/jobs/asdf-1234-asdf-1234", nil)
-	req.SetBasicAuth("test", "test")
+	addApiTokenHeader(req, "test")
 	rw := httptest.NewRecorder()
 	s.srv.Handler.ServeHTTP(rw, req)
 
@@ -168,7 +168,7 @@ func TestServerGetJobs(t *testing.T) {
 	db := internalTesting.NewTestDB()
 	_, l := internalTesting.NewTestLogger()
 
-	s, err := NewServer(db, q, l, "test", "test")
+	s, err := NewServer(db, q, l, "test")
 	if err != nil {
 		t.Log(err)
 		t.Fatal(err)
@@ -184,7 +184,7 @@ func TestServerGetJobs(t *testing.T) {
 	db.Jobs = append(db.Jobs, job1, job2)
 
 	req := httptest.NewRequest(http.MethodGet, "/jobs", nil)
-	req.SetBasicAuth("test", "test")
+	addApiTokenHeader(req, "test")
 	rw := httptest.NewRecorder()
 	s.srv.Handler.ServeHTTP(rw, req)
 
@@ -222,7 +222,7 @@ func TestServerDeleteJob(t *testing.T) {
 	db := internalTesting.NewTestDB()
 	_, l := internalTesting.NewTestLogger()
 
-	s, err := NewServer(db, q, l, "test", "test")
+	s, err := NewServer(db, q, l, "test")
 	if err != nil {
 		t.Log(err)
 		t.Fatal(err)
@@ -237,7 +237,7 @@ func TestServerDeleteJob(t *testing.T) {
 	db.Jobs = append(db.Jobs, job)
 
 	req := httptest.NewRequest(http.MethodDelete, "/jobs/asdf-1234-asdf-1234", nil)
-	req.SetBasicAuth("test", "test")
+	addApiTokenHeader(req, "test")
 	rw := httptest.NewRecorder()
 	s.srv.Handler.ServeHTTP(rw, req)
 

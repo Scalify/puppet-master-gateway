@@ -16,12 +16,12 @@ func (t *testHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	t.request = true
 }
 
-func TestBasicAuthNoAuth(t *testing.T) {
+func TestAuthHandlerNoAuth(t *testing.T) {
 	rw := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/test", nil)
 	h := &testHandler{}
 	_, l := internalTesting.NewTestLogger()
-	b := newBasicAuth(l, "asdf", "asdfgh")
+	b := newAuthHandler(l, "asdf")
 
 	b.Middleware(h).ServeHTTP(rw, req)
 
@@ -38,14 +38,14 @@ func TestBasicAuthNoAuth(t *testing.T) {
 	}
 }
 
-func TestBasicAuthWrongAuth(t *testing.T) {
+func TestAuthHandlerWrongAuth(t *testing.T) {
 	rw := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/test", nil)
 	h := &testHandler{}
 	_, l := internalTesting.NewTestLogger()
-	b := newBasicAuth(l, "asdf", "asdfgh")
+	b := newAuthHandler(l, "asdf")
 
-	req.SetBasicAuth("test", "test")
+	addApiTokenHeader(req, "qwertz")
 	b.Middleware(h).ServeHTTP(rw, req)
 
 	if h.request {
@@ -61,14 +61,14 @@ func TestBasicAuthWrongAuth(t *testing.T) {
 	}
 }
 
-func TestBasicAuth(t *testing.T) {
+func TestAuthHandler(t *testing.T) {
 	rw := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/test", nil)
 	h := &testHandler{}
 	_, l := internalTesting.NewTestLogger()
-	b := newBasicAuth(l, "test", "test")
+	b := newAuthHandler(l, "test")
 
-	req.SetBasicAuth("test", "test")
+	addApiTokenHeader(req, "test")
 	b.Middleware(h).ServeHTTP(rw, req)
 
 	if !h.request {

@@ -18,8 +18,7 @@ type env struct {
 	CouchDbPort       int    `required:"true" split_words:"true"`
 	CouchDbUsername   string `required:"true" split_words:"true"`
 	CouchDbPassword   string `required:"true" split_words:"true"`
-	BasicAuthUsername string `required:"true" split_words:"true"`
-	BasicAuthPassword string `required:"true" split_words:"true"`
+	ApiToken          string `required:"true" split_words:"true"`
 }
 
 // gatewayCmd represents the gateway command
@@ -45,7 +44,7 @@ var gatewayCmd = &cobra.Command{
 		setupLogger(logger, cfg.Verbose)
 		db := connectJobDB(logger, cfg)
 
-		server, err := gateway.NewServer(db, queue, logger.WithFields(logrus.Fields{}), cfg.BasicAuthUsername, cfg.BasicAuthPassword)
+		server, err := gateway.NewServer(db, queue, logger.WithFields(logrus.Fields{}), cfg.ApiToken)
 		if err != nil {
 			logger.Fatalf("Failed to create gateway: %v", err)
 		}

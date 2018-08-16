@@ -12,31 +12,30 @@ import (
 
 // Server is an http handler serving the puppet-master api
 type Server struct {
-	logger                   *logrus.Entry
-	db                       db
-	queue                    queue
-	srv                      *http.Server
-	basicUser, basicPassword string
+	logger   *logrus.Entry
+	db       db
+	queue    queue
+	srv      *http.Server
+	apiToken string
 }
 
 // NewServer creates a new server
-func NewServer(db db, queue queue, logger *logrus.Entry, basicUser, basicPassword string) (*Server, error) {
+func NewServer(db db, queue queue, logger *logrus.Entry, apiToken string) (*Server, error) {
 	return &Server{
-		logger:        logger,
-		queue:         queue,
-		db:            db,
-		basicUser:     basicUser,
-		basicPassword: basicPassword,
+		logger:   logger,
+		queue:    queue,
+		db:       db,
+		apiToken: apiToken,
 	}, nil
 }
 
 // Start opens the http port and handles the requests
 func (s *Server) Start(ctx context.Context, listenPort int) error {
 	r := mux.NewRouter()
-	basicAuth := newBasicAuth(s.logger, s.basicUser, s.basicPassword)
+	authHandler := newAuthHandler(s.logger, s.apiToken)
 
 	jobs := r.PathPrefix("/jobs").Subrouter()
-	jobs.Use(basicAuth.Middleware)
+	jobs.Use(authHandler.Middleware)
 	jobs.HandleFunc("", s.GetJobs).Methods(http.MethodGet)
 	jobs.HandleFunc("", s.CreateJob).Methods(http.MethodPost)
 	jobs.HandleFunc("/{id}", s.GetJob).Methods(http.MethodGet)
