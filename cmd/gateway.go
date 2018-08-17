@@ -18,7 +18,7 @@ type env struct {
 	CouchDbPort     int    `required:"true" split_words:"true"`
 	CouchDbUsername string `required:"true" split_words:"true"`
 	CouchDbPassword string `required:"true" split_words:"true"`
-	APIToken        string `required:"true" split_words:"true"`
+	APIToken        string `required:"true" split_words:"true" envconfig:"API_TOKEN"`
 }
 
 // gatewayCmd represents the gateway command
