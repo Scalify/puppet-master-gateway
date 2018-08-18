@@ -2,7 +2,6 @@ package api
 
 import (
 	"reflect"
-	"time"
 )
 
 // A Job is executed by the executor and stored in the database and holds all information
@@ -17,9 +16,9 @@ type Job struct {
 	Error      string                 `json:"error"`
 	Logs       []Log                  `json:"logs"`
 	Results    map[string]interface{} `json:"results"`
-	CreatedAt  time.Time              `json:"created_at"`
-	StartedAt  *time.Time             `json:"started_at"`
-	FinishedAt *time.Time             `json:"finished_at"`
+	CreatedAt  JSONTime               `json:"created_at"`
+	StartedAt  *JSONTime              `json:"started_at"`
+	FinishedAt *JSONTime              `json:"finished_at"`
 	Duration   int                    `json:"duration"`
 }
 
@@ -53,8 +52,8 @@ type JobResult struct {
 	Error      string                 `json:"error"`
 	Logs       []Log                  `json:"logs"`
 	Results    map[string]interface{} `json:"results"`
-	StartedAt  *time.Time             `json:"started_at"`
-	FinishedAt *time.Time             `json:"finished_at"`
+	StartedAt  *JSONTime              `json:"started_at"`
+	FinishedAt *JSONTime              `json:"finished_at"`
 	Duration   int                    `json:"duration"`
 }
 
@@ -76,7 +75,7 @@ func (j *JobResult) Equal(j2 *JobResult) bool {
 		reflect.DeepEqual(j.Logs, j2.Logs)
 }
 
-func datesAreEqual(t1 *time.Time, t2 *time.Time) bool {
+func datesAreEqual(t1 *JSONTime, t2 *JSONTime) bool {
 	if (t1 == nil && t2 != nil) || (t1 != nil && t2 == nil) {
 		return false
 	}
@@ -85,14 +84,14 @@ func datesAreEqual(t1 *time.Time, t2 *time.Time) bool {
 		return true
 	}
 
-	return (*t1).Equal(*t2)
+	return (*t1).Equal(t2.Time)
 }
 
 // A Log represents a log line
 type Log struct {
-	Time    time.Time `json:"time"`
-	Level   string    `json:"level"`
-	Message string    `json:"message"`
+	Time    JSONTime `json:"time"`
+	Level   string   `json:"level"`
+	Message string   `json:"message"`
 }
 
 // JobResponse is the wrapper around a job when returned through API

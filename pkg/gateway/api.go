@@ -51,7 +51,7 @@ func (s *Server) CreateJob(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	job.Status = api.JobStatusCreated
-	job.CreatedAt = time.Now()
+	job.CreatedAt = api.JSONTime{Time: time.Now()}
 	if job.UUID == "" {
 		job.UUID = uuid.NewV4().String()
 	}

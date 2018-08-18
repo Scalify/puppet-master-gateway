@@ -8,7 +8,7 @@ import (
 	"github.com/Scalify/puppet-master-gateway/pkg/api"
 )
 
-var testTime = time.Now()
+var testTime = api.JSONTime{Time: time.Now()}
 
 func newTestJob(t *testing.T, uuid string) (*api.Job, []byte) {
 	job := api.NewJob()
