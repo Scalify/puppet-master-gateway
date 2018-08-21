@@ -54,6 +54,9 @@ func (s *Server) CreateJob(rw http.ResponseWriter, req *http.Request) {
 	job.CreatedAt = api.JSONTime{Time: time.Now()}
 	if job.UUID == "" {
 		job.UUID = uuid.NewV4().String()
+	} else if s.checkForExistingJob(rw, job.UUID) {
+		// job already exists in db
+		return
 	}
 
 	logger := s.logger.WithField(api.LogFieldJobID, job.UUID)
@@ -72,6 +75,31 @@ func (s *Server) CreateJob(rw http.ResponseWriter, req *http.Request) {
 	if err := json.NewEncoder(rw).Encode(jobResponse); err != nil {
 		logger.Errorf("Failed to encode job: %v", err)
 	}
+}
+
+func (s *Server) checkForExistingJob(rw http.ResponseWriter, uuid string) bool {
+	existingJob, err := s.db.Get(uuid)
+	if err == database.ErrNotFound {
+		return false
+	}
+
+	if err != nil {
+		s.logger.Errorf("Failed to look for existing job on explicit uuid %s: %v", uuid, err)
+		rw.WriteHeader(http.StatusInternalServerError)
+		if _, errw := fmt.Fprintf(rw, jsonErrFailedToSaveJob, err); errw != nil {
+			s.logger.Error(errw)
+		}
+		return true
+	}
+	s.logger.Errorf("Job does already exist with given UUID %s: %v", uuid, err)
+	rw.WriteHeader(http.StatusConflict)
+	err = fmt.Errorf("A job with the given UUID %s does already exist, created at %s", uuid, existingJob.CreatedAt.String())
+
+	if _, errw := fmt.Fprintf(rw, jsonErrJobExists, uuid, err); errw != nil {
+		s.logger.Error(errw)
+	}
+
+	return true
 }
 
 // GetJobs returns a paginated list of jobs

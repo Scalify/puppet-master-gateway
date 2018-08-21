@@ -7,6 +7,7 @@ const (
 	jsonErrFailedToSaveJob    = "{\"error\":\"Failed to save job\", \"message\": %q}"
 	jsonErrFailedToDeleteJob  = "{\"error\":\"Failed to delete job\", \"message\": %q}"
 	jsonErrJobNotFound        = "{\"error\":\"Job %s not found\", \"message\": %q}"
+	jsonErrJobExists        = "{\"error\":\"A job with the given UUID %s already exists\", \"message\": %q}"
 
 	task                  = "task"
 	taskConsumeJobResults = "consumeJobResults"
