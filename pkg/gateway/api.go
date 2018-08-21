@@ -91,6 +91,7 @@ func (s *Server) checkForExistingJob(rw http.ResponseWriter, uuid string) bool {
 		}
 		return true
 	}
+
 	s.logger.Errorf("Job does already exist with given UUID %s: %v", uuid, err)
 	rw.WriteHeader(http.StatusConflict)
 	err = fmt.Errorf("A job with the given UUID %s does already exist, created at %s", uuid, existingJob.CreatedAt.String())
