@@ -89,7 +89,7 @@ func TestServerCreateJob(t *testing.T) {
 	rw := httptest.NewRecorder()
 	s.srv.Handler.ServeHTTP(rw, req)
 
-	if rw.Code != 200 {
+	if rw.Code != 201 {
 		t.Errorf("Unexpected http response: %v", rw.Result().Status)
 	}
 

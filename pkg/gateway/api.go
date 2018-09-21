@@ -70,6 +70,7 @@ func (s *Server) CreateJob(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	rw.WriteHeader(http.StatusCreated)
 	job.Rev = ""
 	jobResponse := &api.JobResponse{Data: job}
 	if err := json.NewEncoder(rw).Encode(jobResponse); err != nil {
