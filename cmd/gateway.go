@@ -58,6 +58,8 @@ var gatewayCmd = &cobra.Command{
 		if err := server.Start(ctx, cfg.ListenPort); err != nil {
 			logger.Fatalf("Failed to start coordinator: %v", err)
 		}
+
+		<-ctx.Done()
 	},
 }
 
