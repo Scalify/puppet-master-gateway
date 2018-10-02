@@ -34,18 +34,20 @@ func NewServer(db db, queue queue, logger *logrus.Entry, apiToken string, enable
 
 // Start opens the http port and handles the requests
 func (s *Server) Start(ctx context.Context, listenPort int) error {
-	if s.enableAPI {
-		if err := s.setupAPI(ctx, listenPort); err != nil {
-			return err
-		}
-	}
-
 	if s.enableJobs {
 		go s.consumeJobResults(ctx)
 		go s.produceJobs(ctx)
 	}
 
-	return s.srv.ListenAndServe()
+	if s.enableAPI {
+		if err := s.setupAPI(ctx, listenPort); err != nil {
+			return err
+		}
+
+		return s.srv.ListenAndServe()
+	}
+
+	return nil
 }
 
 func (s *Server) setupAPI(ctx context.Context, listenPort int) error {
