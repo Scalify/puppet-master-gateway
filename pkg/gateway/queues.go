@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/Scalify/puppet-master-gateway/pkg/api"
+	"github.com/Scalify/puppet-master-gateway/pkg/database"
 	"github.com/Sirupsen/logrus"
 	"github.com/streadway/amqp"
 )
@@ -74,6 +75,12 @@ func (s *Server) nack(logger *logrus.Entry, msg amqp.Delivery, requeue bool) {
 	}
 }
 
+func (s *Server) ack(logger *logrus.Entry, msg amqp.Delivery) {
+	if err := msg.Ack(false); err != nil {
+		logger.Errorf("Failed to aack message: %v", err)
+	}
+}
+
 func (s *Server) handleJobResult(logger *logrus.Entry, msg amqp.Delivery) {
 	logger.Debugf("Consuming message from queue: %v", string(msg.Body))
 
@@ -94,6 +101,12 @@ func (s *Server) handleJobResult(logger *logrus.Entry, msg amqp.Delivery) {
 
 	job, err := s.db.Get(result.UUID)
 	if err != nil {
+		if err == database.ErrNotFound {
+			l.Errorf("Job %q does not exist in DB, skipping.", result.UUID)
+			s.ack(logger, msg)
+			return
+		}
+
 		l.Errorf("Failed to load job from db: %v", err)
 		s.nack(logger, msg, true)
 		return
