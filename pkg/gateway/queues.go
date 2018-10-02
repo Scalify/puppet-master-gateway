@@ -161,6 +161,10 @@ func (s *Server) produceJobs(ctx context.Context) {
 		for _, job := range jobs {
 			l := logger.WithField(api.LogFieldJobID, job.UUID)
 			if err := s.publishNewJob(job); err != nil {
+				if err == amqp.ErrClosed {
+					l.Fatalf("amqp connection is closed, aborting.")
+				}
+
 				l.Errorf("Failed to queue job: %v", err)
 				continue
 			}
