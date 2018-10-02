@@ -36,6 +36,10 @@ var gatewayCmd = &cobra.Command{
 			logger.Fatal(err)
 		}
 
+		if !cfg.EnableAPI && !cfg.EnableJobs {
+			logger.Fatal("Either API or background job processing needs to be enabled")
+		}
+
 		conn, queue := connectQueue(logger, cfg.QueueUsername, cfg.QueuePassword, cfg.QueueHost, cfg.QueuePort)
 		defer func() {
 			if err := conn.Close(); err != nil {
