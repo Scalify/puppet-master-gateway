@@ -12,25 +12,43 @@ import (
 
 // Server is an http handler serving the puppet-master api
 type Server struct {
-	logger   *logrus.Entry
-	db       db
-	queue    queue
-	srv      *http.Server
-	apiToken string
+	logger                *logrus.Entry
+	db                    db
+	queue                 queue
+	srv                   *http.Server
+	apiToken              string
+	enableAPI, enableJobs bool
 }
 
 // NewServer creates a new server
-func NewServer(db db, queue queue, logger *logrus.Entry, apiToken string) (*Server, error) {
+func NewServer(db db, queue queue, logger *logrus.Entry, apiToken string, enableAPI, enableJobs bool) (*Server, error) {
 	return &Server{
-		logger:   logger,
-		queue:    queue,
-		db:       db,
-		apiToken: apiToken,
+		logger:     logger,
+		queue:      queue,
+		db:         db,
+		apiToken:   apiToken,
+		enableAPI:  enableAPI,
+		enableJobs: enableJobs,
 	}, nil
 }
 
 // Start opens the http port and handles the requests
 func (s *Server) Start(ctx context.Context, listenPort int) error {
+	if s.enableAPI {
+		if err := s.setupAPI(ctx, listenPort); err != nil {
+			return err
+		}
+	}
+
+	if s.enableJobs {
+		go s.consumeJobResults(ctx)
+		go s.produceJobs(ctx)
+	}
+
+	return s.srv.ListenAndServe()
+}
+
+func (s *Server) setupAPI(ctx context.Context, listenPort int) error {
 	r := mux.NewRouter()
 	authHandler := newAuthHandler(s.logger, s.apiToken)
 
@@ -69,10 +87,7 @@ func (s *Server) Start(ctx context.Context, listenPort int) error {
 		}
 	}()
 
-	go s.consumeJobResults(ctx)
-	go s.produceJobs(ctx)
-
-	return s.srv.ListenAndServe()
+	return nil
 }
 
 // Shutdown closes the http server

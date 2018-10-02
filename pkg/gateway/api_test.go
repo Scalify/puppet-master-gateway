@@ -18,7 +18,7 @@ func TestServerStartUnauthorizedJobs(t *testing.T) {
 	db := internalTesting.NewTestDB()
 	_, l := internalTesting.NewTestLogger()
 
-	s, err := NewServer(db, q, l, "test")
+	s, err := NewServer(db, q, l, "test", true, true)
 	if err != nil {
 		t.Log(err)
 		t.Fatal(err)
@@ -45,7 +45,7 @@ func TestServerStartUnauthorizedHealthz(t *testing.T) {
 	db := internalTesting.NewTestDB()
 	_, l := internalTesting.NewTestLogger()
 
-	s, err := NewServer(db, q, l, "test")
+	s, err := NewServer(db, q, l, "test", true, true)
 	if err != nil {
 		t.Log(err)
 		t.Fatal(err)
@@ -72,7 +72,7 @@ func TestServerCreateJob(t *testing.T) {
 	db := internalTesting.NewTestDB()
 	_, l := internalTesting.NewTestLogger()
 
-	s, err := NewServer(db, q, l, "test")
+	s, err := NewServer(db, q, l, "test", true, true)
 	if err != nil {
 		t.Log(err)
 		t.Fatal(err)
@@ -124,7 +124,7 @@ func TestServerGetJob(t *testing.T) {
 	db := internalTesting.NewTestDB()
 	_, l := internalTesting.NewTestLogger()
 
-	s, err := NewServer(db, q, l, "test")
+	s, err := NewServer(db, q, l, "test", true, true)
 	if err != nil {
 		t.Log(err)
 		t.Fatal(err)
@@ -168,7 +168,7 @@ func TestServerGetJobs(t *testing.T) {
 	db := internalTesting.NewTestDB()
 	_, l := internalTesting.NewTestLogger()
 
-	s, err := NewServer(db, q, l, "test")
+	s, err := NewServer(db, q, l, "test", true, true)
 	if err != nil {
 		t.Log(err)
 		t.Fatal(err)
@@ -222,7 +222,7 @@ func TestServerDeleteJob(t *testing.T) {
 	db := internalTesting.NewTestDB()
 	_, l := internalTesting.NewTestLogger()
 
-	s, err := NewServer(db, q, l, "test")
+	s, err := NewServer(db, q, l, "test", true, true)
 	if err != nil {
 		t.Log(err)
 		t.Fatal(err)

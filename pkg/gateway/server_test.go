@@ -15,7 +15,7 @@ func TestServerStart(t *testing.T) {
 	db := internalTesting.NewTestDB()
 	_, l := internalTesting.NewTestLogger()
 
-	s, err := NewServer(db, q, l, "test")
+	s, err := NewServer(db, q, l, "test", true, true)
 	if err != nil {
 		t.Log(err)
 		t.Fatal(err)
@@ -40,7 +40,7 @@ func TestServerShutdown(t *testing.T) {
 	db := internalTesting.NewTestDB()
 	_, l := internalTesting.NewTestLogger()
 
-	s, err := NewServer(db, q, l, "test")
+	s, err := NewServer(db, q, l, "test", true, true)
 	if err != nil {
 		t.Log(err)
 		t.Fatal(err)

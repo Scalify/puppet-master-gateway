@@ -10,6 +10,8 @@ import (
 type env struct {
 	ListenPort      int    `default:"3000" split_words:"true"`
 	Verbose         bool   `default:"false" split_words:"true"`
+	EnableAPI       bool   `default:"true" split_words:"true" envconfig:"ENABLE_API"`
+	EnableJobs      bool   `default:"true" split_words:"true"`
 	QueueHost       string `required:"true" split_words:"true"`
 	QueuePort       int    `required:"true" split_words:"true"`
 	QueueUsername   string `required:"true" split_words:"true"`
@@ -44,7 +46,7 @@ var gatewayCmd = &cobra.Command{
 		setupLogger(logger, cfg.Verbose)
 		db := connectJobDB(logger, cfg)
 
-		server, err := gateway.NewServer(db, queue, logger.WithFields(logrus.Fields{}), cfg.APIToken)
+		server, err := gateway.NewServer(db, queue, logger.WithFields(logrus.Fields{}), cfg.APIToken, cfg.EnableAPI, cfg.EnableJobs)
 		if err != nil {
 			logger.Fatalf("Failed to create gateway: %v", err)
 		}
