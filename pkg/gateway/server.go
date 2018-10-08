@@ -34,6 +34,10 @@ func NewServer(db db, queue queue, logger *logrus.Entry, apiToken string, enable
 
 // Start opens the http port and handles the requests
 func (s *Server) Start(ctx context.Context, listenPort int) error {
+	if err := s.ensureQueues(); err != nil {
+		return err
+	}
+
 	if s.enableJobs {
 		go s.consumeJobResults(ctx)
 		go s.produceJobs(ctx)
@@ -73,10 +77,6 @@ func (s *Server) setupAPI(ctx context.Context, listenPort int) error {
 		ReadTimeout:  time.Second * 15,
 		IdleTimeout:  time.Second * 60,
 		Handler:      r,
-	}
-
-	if err := s.ensureQueues(); err != nil {
-		return err
 	}
 
 	go func() {
