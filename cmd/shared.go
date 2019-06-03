@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/Scalify/puppet-master-gateway/pkg/database"
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/rhinoman/couchdb-go"
 	"github.com/streadway/amqp"
 )

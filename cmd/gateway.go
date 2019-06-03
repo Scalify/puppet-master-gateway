@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/Scalify/puppet-master-gateway/pkg/gateway"
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/spf13/cobra"
 )

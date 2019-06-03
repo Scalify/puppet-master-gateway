@@ -1,33 +1,28 @@
-hash: 45020dbd8a38e5e662caf4ce7da62d46a3591db2dc9a59ffb1e73578944eeb2b
-updated: 2018-08-15T10:58:41.347734993+02:00
+hash: 72691eaeab2d1d1822ea2ce1b916228b4607d1a5199e4c4f63452cb412658115
+updated: 2019-06-03T20:55:22.595845+02:00
 imports:
-- name: github.com/gorilla/context
-  version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
-  version: 5e55a4adb89fb64e8b13bbd302eeedac7a4ba5d8
+  version: ed099d42384823742bba0bf9a72b53b55c9e2e38
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/kelseyhightower/envconfig
-  version: b2c5c876e2659d9060d82e9b8494150d53854cc4
+  version: 0b417c4ec4a8a82eecc22a1459a504aa55163d61
+- name: github.com/konsorten/go-windows-terminal-sequences
+  version: f55edac94c9bbba5d6182a4be46d86a2c9b5b50e
 - name: github.com/rhinoman/couchdb-go
   version: 310a5a9beb662138d34cc3e2d510824047e58553
 - name: github.com/satori/go.uuid
-  version: f58768cc1a7a7e77a3bd49e98cdd21419399b6a3
-- name: github.com/Sirupsen/logrus
-  version: 3e01752db0189b9157070a0e1668a620f9a85da2
+  version: b2ce2384e17bbe0c6d34077efa39dbab3e09123b
+- name: github.com/sirupsen/logrus
+  version: 839c75faf7f98a33d445d181f3018b5c3409a45e
 - name: github.com/spf13/cobra
-  version: ef82de70bb3f60c65fb8eebacbb2d122ef517385
+  version: 67fc4837d267bc9bfd6e47f77783fcc3dffc68de
 - name: github.com/spf13/pflag
-  version: 583c0c0531f06d5278b7d917446061adc344b5cd
+  version: 24fa6976df40757dce6aea913e7b81ade90530e1
 - name: github.com/streadway/amqp
-  version: 8e4aba63da9fc5571e01c6a45dc809a58cbc5a68
-- name: golang.org/x/crypto
-  version: 613d6eafa307c6881a737a3c35c0e312e8d3a8c5
-  subpackages:
-  - ssh/terminal
+  version: 75d898a42a940fbc854dfd1a4199eabdc00cf024
 - name: golang.org/x/sys
-  version: 78d5f264b493f125018180c204871ecf58a2dce1
+  version: 4c4f7f33c9ed00de01c4c741d2177abfcfe19307
   subpackages:
   - unix
-  - windows
 testImports: []
