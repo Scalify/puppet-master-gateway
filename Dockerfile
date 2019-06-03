@@ -1,4 +1,4 @@
-FROM scalify/glide:0.13.0 as builder
+FROM scalify/glide:0.13.2 as builder
 WORKDIR /go/src/github.com/Scalify/puppet-master-gateway/
 
 COPY glide.yaml glide.lock ./
