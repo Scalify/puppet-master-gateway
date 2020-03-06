@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	internalTesting "github.com/Scalify/puppet-master-gateway/pkg/internal/testing"
+	internalTesting "github.com/scalify/puppet-master-gateway/pkg/internal/testing"
 )
 
 func addAPITokenHeader(r *http.Request, apiToken string) {

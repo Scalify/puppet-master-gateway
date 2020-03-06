@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Scalify/puppet-master-gateway/pkg/api"
+	"github.com/scalify/puppet-master-gateway/pkg/api"
 )
 
 var testTime = api.JSONTime{Time: time.Now()}

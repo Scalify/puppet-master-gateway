@@ -1,9 +1,10 @@
 package database
 
 import (
-	"github.com/Scalify/puppet-master-gateway/pkg/api"
 	"github.com/rhinoman/couchdb-go"
 	"github.com/satori/go.uuid"
+
+	"github.com/scalify/puppet-master-gateway/pkg/api"
 )
 
 // JobDB talks to a couchDB server and handles Job instances

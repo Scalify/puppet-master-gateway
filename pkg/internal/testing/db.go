@@ -1,8 +1,8 @@
 package testing
 
 import (
-	"github.com/Scalify/puppet-master-gateway/pkg/api"
-	"github.com/Scalify/puppet-master-gateway/pkg/database"
+	"github.com/scalify/puppet-master-gateway/pkg/api"
+	"github.com/scalify/puppet-master-gateway/pkg/database"
 )
 
 // TestDB is a db implementation used for testing

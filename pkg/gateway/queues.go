@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Scalify/puppet-master-gateway/pkg/api"
-	"github.com/Scalify/puppet-master-gateway/pkg/database"
+	"github.com/scalify/puppet-master-gateway/pkg/api"
+	"github.com/scalify/puppet-master-gateway/pkg/database"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 )

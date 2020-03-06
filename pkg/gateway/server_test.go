@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	internalTesting "github.com/Scalify/puppet-master-gateway/pkg/internal/testing"
+	internalTesting "github.com/scalify/puppet-master-gateway/pkg/internal/testing"
 )
 
 func TestServerStart(t *testing.T) {

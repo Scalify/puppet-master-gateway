@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Scalify/puppet-master-gateway/pkg/api"
-	internalTesting "github.com/Scalify/puppet-master-gateway/pkg/internal/testing"
+	"github.com/scalify/puppet-master-gateway/pkg/api"
+	internalTesting "github.com/scalify/puppet-master-gateway/pkg/internal/testing"
 )
 
 func TestServer_ensureQueues(t *testing.T) {

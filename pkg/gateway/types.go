@@ -1,7 +1,7 @@
 package gateway
 
 import (
-	"github.com/Scalify/puppet-master-gateway/pkg/api"
+	"github.com/scalify/puppet-master-gateway/pkg/api"
 	"github.com/streadway/amqp"
 )
 

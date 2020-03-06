@@ -7,10 +7,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Scalify/puppet-master-gateway/pkg/api"
-	"github.com/Scalify/puppet-master-gateway/pkg/database"
 	"github.com/gorilla/mux"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
+
+	"github.com/scalify/puppet-master-gateway/pkg/api"
+	"github.com/scalify/puppet-master-gateway/pkg/database"
 )
 
 func (s *Server) getQueryParamAsInt(req *http.Request, param string, defaultValue int) (int, error) {

@@ -1,16 +1,15 @@
-FROM scalify/glide:0.13.2 as builder
-WORKDIR /go/src/github.com/Scalify/puppet-master-gateway/
+FROM golang as builder
+WORKDIR /src/
 
-COPY glide.yaml glide.lock ./
-RUN glide install --strip-vendor
+COPY go.mod go.sum ./
+RUN go mod download
 
 COPY . ./
 RUN CGO_ENABLED=0 go build -a -ldflags '-s' -installsuffix cgo -o bin/gateway .
 
-
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 WORKDIR /root/
-COPY --from=builder /go/src/github.com/Scalify/puppet-master-gateway/bin/gateway .
+COPY --from=builder /src/bin/gateway .
 RUN chmod +x gateway
-ENTRYPOINT ["./gateway", "gateway"]
+CMD ["./gateway", "gateway"]
