@@ -1,8 +1,9 @@
 package gateway
 
 import (
-	"github.com/scalify/puppet-master-gateway/pkg/api"
 	"github.com/streadway/amqp"
+
+	"github.com/scalify/puppet-master-gateway/pkg/api"
 )
 
 type db interface {

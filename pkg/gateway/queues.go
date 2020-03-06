@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/scalify/puppet-master-gateway/pkg/api"
-	"github.com/scalify/puppet-master-gateway/pkg/database"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
+
+	"github.com/scalify/puppet-master-gateway/pkg/api"
+	"github.com/scalify/puppet-master-gateway/pkg/database"
 )
 
 func (s *Server) ensureQueues() error {

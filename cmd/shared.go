@@ -8,10 +8,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/scalify/puppet-master-gateway/pkg/database"
-	"github.com/sirupsen/logrus"
 	"github.com/rhinoman/couchdb-go"
+	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
+
+	"github.com/scalify/puppet-master-gateway/pkg/database"
 )
 
 func setupLogger(logger *logrus.Logger, verbose bool) {

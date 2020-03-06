@@ -2,9 +2,10 @@ package cmd
 
 import (
 	"github.com/kelseyhightower/envconfig"
-	"github.com/scalify/puppet-master-gateway/pkg/gateway"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+
+	"github.com/scalify/puppet-master-gateway/pkg/gateway"
 )
 
 type env struct {
