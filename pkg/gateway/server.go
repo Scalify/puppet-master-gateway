@@ -6,13 +6,13 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/aklinkert/go-logging"
 	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 )
 
 // Server is an http handler serving the puppet-master api
 type Server struct {
-	logger                *logrus.Entry
+	logger                logging.Logger
 	db                    db
 	queue                 queue
 	srv                   *http.Server
@@ -21,7 +21,7 @@ type Server struct {
 }
 
 // NewServer creates a new server
-func NewServer(db db, queue queue, logger *logrus.Entry, apiToken string, enableAPI, enableJobs bool) (*Server, error) {
+func NewServer(db db, queue queue, logger logging.Logger, apiToken string, enableAPI, enableJobs bool) (*Server, error) {
 	return &Server{
 		logger:     logger,
 		queue:      queue,
@@ -32,8 +32,7 @@ func NewServer(db db, queue queue, logger *logrus.Entry, apiToken string, enable
 	}, nil
 }
 
-// Start opens the http port and handles the requests
-func (s *Server) Start(ctx context.Context, listenPort int) error {
+func (s *Server) prepare(ctx context.Context, listenPort uint) error {
 	if err := s.ensureQueues(); err != nil {
 		return err
 	}
@@ -47,14 +46,24 @@ func (s *Server) Start(ctx context.Context, listenPort int) error {
 		if err := s.setupAPI(ctx, listenPort); err != nil {
 			return err
 		}
+	}
+	return nil
+}
 
+// Start opens the http port and handles the requests
+func (s *Server) Start(ctx context.Context, listenPort uint) error {
+	if err := s.prepare(ctx, listenPort); err != nil {
+		return err
+	}
+
+	if s.enableAPI {
 		return s.srv.ListenAndServe()
 	}
 
 	return nil
 }
 
-func (s *Server) setupAPI(ctx context.Context, listenPort int) error {
+func (s *Server) setupAPI(ctx context.Context, listenPort uint) error {
 	r := mux.NewRouter()
 	authHandler := newAuthHandler(s.logger, s.apiToken)
 

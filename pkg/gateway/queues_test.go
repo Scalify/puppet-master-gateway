@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/aklinkert/go-logging"
+
 	"github.com/scalify/puppet-master-gateway/pkg/api"
 	internalTesting "github.com/scalify/puppet-master-gateway/pkg/internal/testing"
 )
@@ -14,7 +16,7 @@ import (
 func TestServer_ensureQueues(t *testing.T) {
 	q := internalTesting.NewTestQueue()
 	db := internalTesting.NewTestDB()
-	_, l := internalTesting.NewTestLogger()
+	l := logging.NewTestLogger(t)
 
 	s, err := NewServer(db, q, l, "test", true, true)
 	if err != nil {
@@ -40,7 +42,7 @@ func TestServer_ensureQueues(t *testing.T) {
 func TestServer_publishNewJob(t *testing.T) {
 	q := internalTesting.NewTestQueue()
 	db := internalTesting.NewTestDB()
-	_, l := internalTesting.NewTestLogger()
+	l := logging.NewTestLogger(t)
 
 	s, err := NewServer(db, q, l, "test", true, true)
 	if err != nil {
@@ -71,7 +73,7 @@ func TestServer_publishNewJob(t *testing.T) {
 func TestServerConsumeJobResults(t *testing.T) {
 	q := internalTesting.NewTestQueue()
 	db := internalTesting.NewTestDB()
-	b, l := internalTesting.NewTestLogger()
+	l := logging.NewTestLogger(t)
 
 	s, err := NewServer(db, q, l, "test", true, true)
 	if err != nil {
@@ -88,11 +90,10 @@ func TestServerConsumeJobResults(t *testing.T) {
 	job2, _ := newTestJob(t, res2.UUID)
 	db.Jobs = []*api.Job{job1, job2}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(1*time.Second))
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
 	s.consumeJobResults(ctx)
-	internalTesting.CheckLogger(t, b)
 
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 	cancel()
 
 	t.Logf("len Queue Messages: %v", len(q.Messages))

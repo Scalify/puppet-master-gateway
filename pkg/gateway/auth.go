@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/sirupsen/logrus"
+	"github.com/aklinkert/go-logging"
 )
 
 const (
@@ -12,11 +12,11 @@ const (
 )
 
 type authHandlerMiddleware struct {
-	logger   *logrus.Entry
+	logger   logging.Logger
 	apiToken string
 }
 
-func newAuthHandler(logger *logrus.Entry, apiToken string) *authHandlerMiddleware {
+func newAuthHandler(logger logging.Logger, apiToken string) *authHandlerMiddleware {
 	return &authHandlerMiddleware{
 		logger:   logger,
 		apiToken: apiToken,

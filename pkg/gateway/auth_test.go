@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	internalTesting "github.com/scalify/puppet-master-gateway/pkg/internal/testing"
+	"github.com/aklinkert/go-logging"
 )
 
 func addAPITokenHeader(r *http.Request, apiToken string) {
@@ -25,7 +25,7 @@ func TestAuthHandlerNoAuth(t *testing.T) {
 	rw := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/test", nil)
 	h := &testHandler{}
-	_, l := internalTesting.NewTestLogger()
+	l := logging.NewTestLogger(t)
 	b := newAuthHandler(l, "asdf")
 
 	b.Middleware(h).ServeHTTP(rw, req)
@@ -47,7 +47,7 @@ func TestAuthHandlerWrongAuth(t *testing.T) {
 	rw := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/test", nil)
 	h := &testHandler{}
-	_, l := internalTesting.NewTestLogger()
+	l := logging.NewTestLogger(t)
 	b := newAuthHandler(l, "asdf")
 
 	addAPITokenHeader(req, "qwertz")
@@ -70,7 +70,7 @@ func TestAuthHandler(t *testing.T) {
 	rw := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/test", nil)
 	h := &testHandler{}
-	_, l := internalTesting.NewTestLogger()
+	l := logging.NewTestLogger(t)
 	b := newAuthHandler(l, "test")
 
 	addAPITokenHeader(req, "test")

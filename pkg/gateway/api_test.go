@@ -10,6 +10,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/aklinkert/go-logging"
+
 	"github.com/scalify/puppet-master-gateway/pkg/api"
 	internalTesting "github.com/scalify/puppet-master-gateway/pkg/internal/testing"
 )
@@ -17,7 +19,7 @@ import (
 func TestServerStartUnauthorizedJobs(t *testing.T) {
 	q := internalTesting.NewTestQueue()
 	db := internalTesting.NewTestDB()
-	_, l := internalTesting.NewTestLogger()
+	l := logging.NewTestLogger(t)
 
 	s, err := NewServer(db, q, l, "test", true, true)
 	if err != nil {
@@ -27,11 +29,7 @@ func TestServerStartUnauthorizedJobs(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	go func() {
-		if err := s.Start(ctx, 0); err != nil {
-			l.Fatal(fmt.Errorf("failed to start server: %v", err))
-		}
-	}()
+	go startServer(ctx, t, s)
 	time.Sleep(10 * time.Millisecond)
 
 	req := httptest.NewRequest(http.MethodPost, "/jobs", bytes.NewBuffer([]byte("{}")))
@@ -48,7 +46,7 @@ func TestServerStartUnauthorizedJobs(t *testing.T) {
 func TestServerStartUnauthorizedHealthz(t *testing.T) {
 	q := internalTesting.NewTestQueue()
 	db := internalTesting.NewTestDB()
-	_, l := internalTesting.NewTestLogger()
+	l := logging.NewTestLogger(t)
 
 	s, err := NewServer(db, q, l, "test", true, true)
 	if err != nil {
@@ -58,11 +56,7 @@ func TestServerStartUnauthorizedHealthz(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	go func() {
-		if err := s.Start(ctx, 0); err != nil {
-			l.Fatal(fmt.Errorf("failed to start server: %v", err))
-		}
-	}()
+	go startServer(ctx, t, s)
 	time.Sleep(10 * time.Millisecond)
 
 	req := httptest.NewRequest(http.MethodGet, "/healthz", nil)
@@ -79,7 +73,7 @@ func TestServerStartUnauthorizedHealthz(t *testing.T) {
 func TestServerCreateJob(t *testing.T) {
 	q := internalTesting.NewTestQueue()
 	db := internalTesting.NewTestDB()
-	_, l := internalTesting.NewTestLogger()
+	l := logging.NewTestLogger(t)
 
 	s, err := NewServer(db, q, l, "test", true, true)
 	if err != nil {
@@ -89,11 +83,7 @@ func TestServerCreateJob(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	go func() {
-		if err := s.Start(ctx, 0); err != nil {
-			l.Fatal(fmt.Errorf("failed to start server: %v", err))
-		}
-	}()
+	go startServer(ctx, t, s)
 	time.Sleep(100 * time.Millisecond)
 
 	job, b := newTestJob(t, "asdf-1234-asdf-1234")
@@ -135,7 +125,7 @@ func TestServerCreateJob(t *testing.T) {
 func TestServerGetJob(t *testing.T) {
 	q := internalTesting.NewTestQueue()
 	db := internalTesting.NewTestDB()
-	_, l := internalTesting.NewTestLogger()
+	l := logging.NewTestLogger(t)
 
 	s, err := NewServer(db, q, l, "test", true, true)
 	if err != nil {
@@ -145,11 +135,7 @@ func TestServerGetJob(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	go func() {
-		if err := s.Start(ctx, 0); err != nil {
-			l.Fatal(fmt.Errorf("failed to start server: %v", err))
-		}
-	}()
+	go startServer(ctx, t, s)
 	time.Sleep(100 * time.Millisecond)
 
 	job, _ := newTestJob(t, "asdf-1234-asdf-1234")
@@ -183,7 +169,7 @@ func TestServerGetJob(t *testing.T) {
 func TestServerGetJobs(t *testing.T) {
 	q := internalTesting.NewTestQueue()
 	db := internalTesting.NewTestDB()
-	_, l := internalTesting.NewTestLogger()
+	l := logging.NewTestLogger(t)
 
 	s, err := NewServer(db, q, l, "test", true, true)
 	if err != nil {
@@ -193,11 +179,7 @@ func TestServerGetJobs(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	go func() {
-		if err := s.Start(ctx, 0); err != nil {
-			l.Fatal(fmt.Errorf("failed to start server: %v", err))
-		}
-	}()
+	go startServer(ctx, t, s)
 	time.Sleep(100 * time.Millisecond)
 
 	job1, _ := newTestJob(t, "asdf-1234-asdf-1234")
@@ -241,7 +223,7 @@ func TestServerGetJobs(t *testing.T) {
 func TestServerDeleteJob(t *testing.T) {
 	q := internalTesting.NewTestQueue()
 	db := internalTesting.NewTestDB()
-	_, l := internalTesting.NewTestLogger()
+	l := logging.NewTestLogger(t)
 
 	s, err := NewServer(db, q, l, "test", true, true)
 	if err != nil {
@@ -251,11 +233,7 @@ func TestServerDeleteJob(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	go func() {
-		if err := s.Start(ctx, 0); err != nil {
-			l.Fatal(fmt.Errorf("failed to start server: %v", err))
-		}
-	}()
+	go startServer(ctx, t, s)
 	time.Sleep(100 * time.Millisecond)
 
 	job, _ := newTestJob(t, "asdf-1234-asdf-1234")
@@ -284,5 +262,11 @@ func TestServerDeleteJob(t *testing.T) {
 	t.Logf("message deleted in db: %+v", db.DeletedJobs[0])
 	if db.DeletedJobs[0].UUID != job.UUID {
 		t.Fatalf("Jobs are not equal: %+v , %+v", job.UUID, db.DeletedJobs[0].UUID)
+	}
+}
+
+func startServer(ctx context.Context, t *testing.T, s *Server) {
+	if err := s.prepare(ctx, 0); err != nil && err != http.ErrServerClosed {
+		t.Errorf("failed to start server: %v", err)
 	}
 }

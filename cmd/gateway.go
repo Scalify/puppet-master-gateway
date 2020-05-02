@@ -9,7 +9,7 @@ import (
 )
 
 type env struct {
-	ListenPort      int    `default:"3000" split_words:"true"`
+	ListenPort      uint   `default:"3000" split_words:"true"`
 	Verbose         bool   `default:"false" split_words:"true"`
 	EnableAPI       bool   `default:"true" split_words:"true" envconfig:"ENABLE_API"`
 	EnableJobs      bool   `default:"true" split_words:"true"`

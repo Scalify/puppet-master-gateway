@@ -8,13 +8,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/aklinkert/go-logging"
+
 	internalTesting "github.com/scalify/puppet-master-gateway/pkg/internal/testing"
 )
 
 func TestServerStart(t *testing.T) {
 	q := internalTesting.NewTestQueue()
 	db := internalTesting.NewTestDB()
-	_, l := internalTesting.NewTestLogger()
+	l := logging.NewTestLogger(t)
 
 	s, err := NewServer(db, q, l, "test", true, true)
 	if err != nil {
@@ -43,7 +45,7 @@ func TestServerStart(t *testing.T) {
 func TestServerShutdown(t *testing.T) {
 	q := internalTesting.NewTestQueue()
 	db := internalTesting.NewTestDB()
-	_, l := internalTesting.NewTestLogger()
+	l := logging.NewTestLogger(t)
 
 	s, err := NewServer(db, q, l, "test", true, true)
 	if err != nil {
@@ -51,12 +53,9 @@ func TestServerShutdown(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	ctx := context.Background()
-	go func() {
-		if err := s.Start(ctx, 0); err != nil {
-			l.Fatal(fmt.Errorf("failed to start server: %v", err))
-		}
-	}()
+	ctx, cancel := context.WithTimeout(context.Background(), 1000*time.Millisecond)
+	defer cancel()
+	go startServer(ctx, t, s)
 	time.Sleep(100 * time.Millisecond)
 
 	if err := s.Shutdown(ctx); err != nil {

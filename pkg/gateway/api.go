@@ -7,8 +7,10 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/aklinkert/go-logging"
 	"github.com/gorilla/mux"
 	uuid "github.com/satori/go.uuid"
+	"github.com/sirupsen/logrus"
 
 	"github.com/scalify/puppet-master-gateway/pkg/api"
 	"github.com/scalify/puppet-master-gateway/pkg/database"
@@ -37,6 +39,15 @@ func (s *Server) getPageAndPerPage(req *http.Request) (int, int, error) {
 	return page, perPage, nil
 }
 
+func (s *Server) loggerForJob(id string) logging.Logger {
+
+	if entry, ok := s.logger.(*logrus.Entry); ok {
+		return entry.WithField(api.LogFieldJobID, id)
+	}
+
+	return s.logger
+}
+
 // CreateJob stores a job in the database and starts a job worker for it
 func (s *Server) CreateJob(rw http.ResponseWriter, req *http.Request) {
 	rw.Header().Add(api.ContentTypeHeader, api.ContentTypeJSON)
@@ -60,8 +71,7 @@ func (s *Server) CreateJob(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	logger := s.logger.WithField(api.LogFieldJobID, job.UUID)
-
+	logger := s.loggerForJob(job.UUID)
 	if err := s.db.Save(job); err != nil {
 		logger.Errorf("Failed to save job: %v", err)
 		rw.WriteHeader(http.StatusInternalServerError)
@@ -157,7 +167,7 @@ func (s *Server) GetJob(rw http.ResponseWriter, req *http.Request) {
 
 	vars := mux.Vars(req)
 	jobID := vars["id"]
-	logger := s.logger.WithField(api.LogFieldJobID, jobID)
+	logger := s.loggerForJob(jobID)
 
 	job, err := s.db.Get(jobID)
 	if err != nil {
@@ -196,7 +206,7 @@ func (s *Server) DeleteJob(rw http.ResponseWriter, req *http.Request) {
 
 	vars := mux.Vars(req)
 	jobID := vars["id"]
-	logger := s.logger.WithField(api.LogFieldJobID, jobID)
+	logger := s.loggerForJob(jobID)
 
 	job, err := s.db.Get(jobID)
 	if err != nil {

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 
 	"github.com/scalify/puppet-master-gateway/pkg/api"
@@ -42,15 +41,13 @@ func (s *Server) publishNewJob(job *api.Job) error {
 }
 
 func (s *Server) consumeJobResults(ctx context.Context) {
-	logger := s.logger.WithField(task, taskConsumeJobResults)
-
 	if err := s.queue.Qos(1, 0, false); err != nil {
-		logger.Fatalf("Failed to set queue QOS: %v", err)
+		s.logger.Fatalf("Failed to set queue QOS: %v", err)
 	}
 
 	consumer, err := s.queue.Consume(api.QueueNameJobResults, "coordinator", false, false, false, false, nil)
 	if err != nil {
-		logger.Fatalf("Failed to create queue consumer: %v", err)
+		s.logger.Fatalf("Failed to create queue consumer: %v", err)
 		return
 	}
 
@@ -65,57 +62,57 @@ func (s *Server) consumeJobResults(ctx context.Context) {
 				continue
 			}
 
-			s.handleJobResult(logger, msg)
+			s.handleJobResult(msg)
 		}
 	}
 }
 
-func (s *Server) nack(logger *logrus.Entry, msg amqp.Delivery, requeue bool) {
+func (s *Server) nack(msg amqp.Delivery, requeue bool) {
 	if err := msg.Nack(false, requeue); err != nil {
-		logger.Errorf("Failed to nack message (requeue=%v): %v", err, requeue)
+		s.logger.Errorf("Failed to nack message (requeue=%v): %v", err, requeue)
 	}
 }
 
-func (s *Server) ack(logger *logrus.Entry, msg amqp.Delivery) {
+func (s *Server) ack(msg amqp.Delivery) {
 	if err := msg.Ack(false); err != nil {
-		logger.Errorf("Failed to aack message: %v", err)
+		s.logger.Errorf("Failed to aack message: %v", err)
 	}
 }
 
-func (s *Server) handleJobResult(logger *logrus.Entry, msg amqp.Delivery) {
-	logger.Debugf("Consuming message from queue: %v", string(msg.Body))
+func (s *Server) handleJobResult(msg amqp.Delivery) {
+	s.logger.Debugf("Consuming message from queue: %v", string(msg.Body))
 
 	var result api.JobResult
 	if err := json.Unmarshal(msg.Body, &result); err != nil {
-		logger.Errorf("Failed to unmarshal json body: %v", err)
+		s.logger.Errorf("Failed to unmarshal json body: %v", err)
 		return
 	}
 
 	if result.UUID == "" {
-		logger.Errorf("Failed to process job result: object has no UUID")
-		s.nack(logger, msg, false)
+		s.logger.Errorf("Failed to process job result: object has no UUID")
+		s.nack(msg, false)
 		return
 	}
 
-	l := logger.WithField(api.LogFieldJobID, result.UUID)
+	l := s.loggerForJob(result.UUID)
 	l.Debugf("Loading job from db")
 
 	job, err := s.db.Get(result.UUID)
 	if err != nil {
 		if err == database.ErrNotFound {
 			l.Errorf("Job %q does not exist in DB, skipping.", result.UUID)
-			s.ack(logger, msg)
+			s.ack(msg)
 			return
 		}
 
 		l.Errorf("Failed to load job from db: %v", err)
-		s.nack(logger, msg, true)
+		s.nack(msg, true)
 		return
 	}
 
 	if job.Status == api.JobStatusDone {
 		l.Error("Consumed job result was already persisted - at least the job has the status == done.")
-		s.nack(logger, msg, false)
+		s.nack(msg, false)
 		return
 	}
 
@@ -129,7 +126,7 @@ func (s *Server) handleJobResult(logger *logrus.Entry, msg amqp.Delivery) {
 
 	if err := s.db.Save(job); err != nil {
 		l.Errorf("Failed to save job back to db: %v", err)
-		s.nack(logger, msg, true)
+		s.nack(msg, true)
 		return
 	}
 
@@ -142,7 +139,6 @@ func (s *Server) handleJobResult(logger *logrus.Entry, msg amqp.Delivery) {
 }
 
 func (s *Server) produceJobs(ctx context.Context) {
-	logger := s.logger.WithField(task, taskProduceJobs)
 	ticker := time.NewTicker(1 * time.Second)
 
 	for {
@@ -154,13 +150,13 @@ func (s *Server) produceJobs(ctx context.Context) {
 
 		jobs, err := s.db.GetListByStatus(api.JobStatusCreated, 1, 100)
 		if err != nil {
-			logger.Errorf("Failed to get created jobs: %v", err)
+			s.logger.Errorf("Failed to get created jobs: %v", err)
 		}
 
-		logger.Debugf("Got %d created jobs from db.", len(jobs))
+		s.logger.Debugf("Got %d created jobs from db.", len(jobs))
 
 		for _, job := range jobs {
-			l := logger.WithField(api.LogFieldJobID, job.UUID)
+			l := s.loggerForJob(job.UUID)
 			if err := s.publishNewJob(job); err != nil {
 				if err == amqp.ErrClosed {
 					l.Fatalf("amqp connection is closed, aborting.")
