@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -23,7 +24,11 @@ func TestServerStart(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(10*time.Second))
 	defer cancel()
-	go s.Start(ctx, 0)
+	go func() {
+		if err := s.Start(ctx, 0); err != nil {
+			l.Fatal(fmt.Errorf("failed to start server: %v", err))
+		}
+	}()
 
 	time.Sleep(10 * time.Millisecond)
 	req := httptest.NewRequest(http.MethodGet, "/healthz", nil)
@@ -47,7 +52,11 @@ func TestServerShutdown(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	go s.Start(ctx, 0)
+	go func() {
+		if err := s.Start(ctx, 0); err != nil {
+			l.Fatal(fmt.Errorf("failed to start server: %v", err))
+		}
+	}()
 	time.Sleep(100 * time.Millisecond)
 
 	if err := s.Shutdown(ctx); err != nil {

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -24,9 +25,13 @@ func TestServerStartUnauthorizedJobs(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(10*time.Second))
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	go s.Start(ctx, 0)
+	go func() {
+		if err := s.Start(ctx, 0); err != nil {
+			l.Fatal(fmt.Errorf("failed to start server: %v", err))
+		}
+	}()
 	time.Sleep(10 * time.Millisecond)
 
 	req := httptest.NewRequest(http.MethodPost, "/jobs", bytes.NewBuffer([]byte("{}")))
@@ -51,9 +56,13 @@ func TestServerStartUnauthorizedHealthz(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(10*time.Second))
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	go s.Start(ctx, 0)
+	go func() {
+		if err := s.Start(ctx, 0); err != nil {
+			l.Fatal(fmt.Errorf("failed to start server: %v", err))
+		}
+	}()
 	time.Sleep(10 * time.Millisecond)
 
 	req := httptest.NewRequest(http.MethodGet, "/healthz", nil)
@@ -75,12 +84,16 @@ func TestServerCreateJob(t *testing.T) {
 	s, err := NewServer(db, q, l, "test", true, true)
 	if err != nil {
 		t.Log(err)
-		t.Fatal(err)
+		t.Fatal(fmt.Sprintf("failed to start server: %v", err))
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(10*time.Second))
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	go s.Start(ctx, 0)
+	go func() {
+		if err := s.Start(ctx, 0); err != nil {
+			l.Fatal(fmt.Errorf("failed to start server: %v", err))
+		}
+	}()
 	time.Sleep(100 * time.Millisecond)
 
 	job, b := newTestJob(t, "asdf-1234-asdf-1234")
@@ -127,12 +140,16 @@ func TestServerGetJob(t *testing.T) {
 	s, err := NewServer(db, q, l, "test", true, true)
 	if err != nil {
 		t.Log(err)
-		t.Fatal(err)
+		t.Fatal(fmt.Sprintf("failed to start server: %v", err))
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(10*time.Second))
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	go s.Start(ctx, 0)
+	go func() {
+		if err := s.Start(ctx, 0); err != nil {
+			l.Fatal(fmt.Errorf("failed to start server: %v", err))
+		}
+	}()
 	time.Sleep(100 * time.Millisecond)
 
 	job, _ := newTestJob(t, "asdf-1234-asdf-1234")
@@ -171,12 +188,16 @@ func TestServerGetJobs(t *testing.T) {
 	s, err := NewServer(db, q, l, "test", true, true)
 	if err != nil {
 		t.Log(err)
-		t.Fatal(err)
+		t.Fatal(fmt.Sprintf("failed to start server: %v", err))
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(10*time.Second))
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	go s.Start(ctx, 0)
+	go func() {
+		if err := s.Start(ctx, 0); err != nil {
+			l.Fatal(fmt.Errorf("failed to start server: %v", err))
+		}
+	}()
 	time.Sleep(100 * time.Millisecond)
 
 	job1, _ := newTestJob(t, "asdf-1234-asdf-1234")
@@ -225,12 +246,16 @@ func TestServerDeleteJob(t *testing.T) {
 	s, err := NewServer(db, q, l, "test", true, true)
 	if err != nil {
 		t.Log(err)
-		t.Fatal(err)
+		t.Fatal(fmt.Sprintf("failed to start server: %v", err))
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(10*time.Second))
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	go s.Start(ctx, 0)
+	go func() {
+		if err := s.Start(ctx, 0); err != nil {
+			l.Fatal(fmt.Errorf("failed to start server: %v", err))
+		}
+	}()
 	time.Sleep(100 * time.Millisecond)
 
 	job, _ := newTestJob(t, "asdf-1234-asdf-1234")
