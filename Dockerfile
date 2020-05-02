@@ -12,4 +12,4 @@ RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 COPY --from=builder /src/bin/gateway .
 RUN chmod +x gateway
-CMD ["./gateway", "gateway"]
+CMD ["./gateway"]

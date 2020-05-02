@@ -1,5 +1,3 @@
 bin
-vendor
-data
 .git
-docker-compose.yml
+puppet-master-gateway
